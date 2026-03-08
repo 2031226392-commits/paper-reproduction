@@ -1,0 +1,17 @@
+"model_name","sigma2","n","method","alpha","selection_rate","mean_acv_size"
+"model1",1,40,"cvc_frac",0.05,1,6.5
+"model2",1,40,"cvc_frac",0.05,1,1.9
+"model1",4,40,"cvc_frac",0.05,1,5.9
+"model2",4,40,"cvc_frac",0.05,1,1.7
+"model1",1,80,"cvc_frac",0.05,1,6.1
+"model2",1,80,"cvc_frac",0.05,1,1.8
+"model1",4,80,"cvc_frac",0.05,1,7.1
+"model2",4,80,"cvc_frac",0.05,1,1.8
+"model1",1,40,"cvc_pmax",0.05,1,6.5
+"model2",1,40,"cvc_pmax",0.05,1,1.9
+"model1",4,40,"cvc_pmax",0.05,1,5.9
+"model2",4,40,"cvc_pmax",0.05,1,1.7
+"model1",1,80,"cvc_pmax",0.05,1,6.1
+"model2",1,80,"cvc_pmax",0.05,1,1.8
+"model1",4,80,"cvc_pmax",0.05,1,7.1
+"model2",4,80,"cvc_pmax",0.05,1,1.8
