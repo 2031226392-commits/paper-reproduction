@@ -1,32 +1,77 @@
-# Project Goal
+# AGENTS.md
 
-This project reproduces a research paper.
+## Project Goal
 
-# Environment
+This repository reproduces the results of a statistical learning paper.
 
-Python 3.10
+Target outputs:
+- reproduced tables
+- reproduced figures
+- reproduced model metrics
 
-Install dependencies
+---
 
-pip install -r requirements.txt
+## Environment
 
-# Project Structure
+R version:
+R 4.3 or later
 
-src/       source code
-configs/   experiment configs
-scripts/   run scripts
-data/      dataset
-results/   outputs
+Package management:
+Use renv if available.
 
-# Training
+Setup:
+install.packages("renv")
+renv::restore()
 
-python src/train.py
+If renv is not available, install required packages manually.
 
-# Evaluation
+---
 
-python src/eval.py
+## Project Structure
 
-# Rules
+R/          analysis and modeling code
+scripts/    runnable pipeline scripts
+data/       input datasets
+results/    output tables, metrics, saved model objects
+figures/    generated plots and figures
 
-- Prefer minimal changes
-- Run tests after changes
+---
+
+## Key Commands
+
+Run full pipeline:
+
+Rscript scripts/run_all.R
+
+Fit model:
+
+Rscript R/fit_model.R
+
+Evaluate model:
+
+Rscript R/evaluate_model.R
+
+Generate figures:
+
+Rscript R/make_figures.R
+
+---
+
+## Rules for Agents
+
+- Prefer minimal and explainable changes
+- Do not rewrite the entire analysis pipeline unless necessary
+- Keep all assumptions in REPRO_GAP.md
+- Save generated tables in results/
+- Save generated figures in figures/
+- If dataset is missing, stop and report clearly
+
+---
+
+## Expected Outputs
+
+The final outputs should include:
+- reproduced result tables
+- reproduced figures
+- a summary report in README_repro.md
+- documented gaps in REPRO_GAP.md
