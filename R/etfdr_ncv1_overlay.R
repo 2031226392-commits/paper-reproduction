@@ -39,7 +39,7 @@ select_inner_min_1se <- function(losses, fold_id) {
   list(idx_min = idx_min, idx_1se = idx_1se)
 }
 
-select_ncv1_pair <- function(X, y, lambda_grid, outer_folds = 5L, inner_folds = 4L, seed = NULL) {
+select_ncv01 <- function(X, y, lambda_grid, outer_folds = 5L, inner_folds = 4L, seed = NULL) {
   n <- nrow(X)
   if (!is.null(seed)) set.seed(as.integer(seed))
   outer_id <- sample(rep(seq_len(outer_folds), length.out = n))
@@ -75,9 +75,21 @@ select_ncv1_pair <- function(X, y, lambda_grid, outer_folds = 5L, inner_folds = 
     idx_1se_vec[o] <- sel$idx_1se
   }
 
+  se_outer_min <- stats::sd(err_min) / sqrt(length(err_min))
+  if (is.na(se_outer_min)) se_outer_min <- 0
+  thr_min <- min(err_min) + se_outer_min
+  cand_min <- which(err_min <= thr_min)
+
+  se_outer_1se <- stats::sd(err_1se) / sqrt(length(err_1se))
+  if (is.na(se_outer_1se)) se_outer_1se <- 0
+  thr_1se <- min(err_1se) + se_outer_1se
+  cand_1se <- which(err_1se <= thr_1se)
+
   list(
-    idx_ncv1 = idx_min_vec[which.min(err_min)],
-    idx_ncv1_1se = idx_1se_vec[which.min(err_1se)]
+    idx_ncv0 = idx_min_vec[which.min(err_min)],
+    idx_ncv0_1se = idx_min_vec[cand_min[which.max(lambda_grid[idx_min_vec[cand_min]])]],
+    idx_ncv1 = idx_1se_vec[which.min(err_1se)],
+    idx_ncv1_1se = idx_1se_vec[cand_1se[which.max(lambda_grid[idx_1se_vec[cand_1se]])]]
   )
 }
 
@@ -104,10 +116,24 @@ run_ncv1_overlay <- function(cfg) {
       set.seed(cfg$seed + r + ifelse(scenario == "correlated", 100000L, 0L))
       dat <- generate_fig1_data(cfg, scenario)
 
-      sel <- select_ncv1_pair(dat$X, dat$y, lambda_grid,
-                              outer_folds = cfg$outer_folds,
-                              inner_folds = cfg$inner_folds,
-                              seed = cfg$seed + 200000L + r + ifelse(scenario == "correlated", 100000L, 0L))
+      sel <- select_ncv01(dat$X, dat$y, lambda_grid,
+                          outer_folds = cfg$outer_folds,
+                          inner_folds = cfg$inner_folds,
+                          seed = cfg$seed + 200000L + r + ifelse(scenario == "correlated", 100000L, 0L))
+
+      rows[[rid]] <- data.frame(scenario = scenario, rep = r,
+                                method = "ncv0_min",
+                                idx = sel$idx_ncv0,
+                                lambda = lambda_grid[sel$idx_ncv0],
+                                stringsAsFactors = FALSE)
+      rid <- rid + 1L
+
+      rows[[rid]] <- data.frame(scenario = scenario, rep = r,
+                                method = "ncv0_1se",
+                                idx = sel$idx_ncv0_1se,
+                                lambda = lambda_grid[sel$idx_ncv0_1se],
+                                stringsAsFactors = FALSE)
+      rid <- rid + 1L
 
       rows[[rid]] <- data.frame(scenario = scenario, rep = r,
                                 method = "ncv1_min",
@@ -177,17 +203,19 @@ plot_overlay <- function(curve_df, sel_all, out_path) {
 
     xline("cv_min", "#1F77B4", 1)
     xline("cvc_max_lambda", "#FF7F0E", 1)
+    xline("ncv0_min", "#7F7F7F", 1)
     xline("ncv1_min", "#2CA02C", 1)
     xline("cv_1se", "#1F77B4", 2)
+    xline("ncv0_1se", "#7F7F7F", 2)
     xline("ncv1_1se", "#2CA02C", 2)
 
     legend("topleft",
            legend = c("CV MSE", "True FDR", "FDR Est.",
-                      "cv", "cvc", "ncv1", "cv_1se", "ncv1_1se"),
+                      "cv", "cvc", "ncv0", "ncv1", "cv_1se", "ncv0_1se", "ncv1_1se"),
            col = c("#1F77B4", "#111111", "#D62728",
-                   "#1F77B4", "#FF7F0E", "#2CA02C", "#1F77B4", "#2CA02C"),
-           lty = c(1, 1, 1, 1, 1, 1, 2, 2),
-           lwd = c(2, 2, 2, 2, 2, 2, 2, 2),
+                   "#1F77B4", "#FF7F0E", "#7F7F7F", "#2CA02C", "#1F77B4", "#7F7F7F", "#2CA02C"),
+           lty = c(1, 1, 1, 1, 1, 1, 1, 2, 2, 2),
+           lwd = c(2, 2, 2, 2, 2, 2, 2, 2, 2, 2),
            cex = 0.82, bg = "white")
   }
 

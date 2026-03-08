@@ -77,6 +77,7 @@ run_one_ncv <- function(X, y, models, cfg, seed_base) {
   }
 
   list(
+    ncv0 = choose_outer_best(e_best, m_best, models),
     ncv1 = choose_outer_best(e_1se, m_1se, models),
     ncv2 = choose_outer_1se(e_best, m_best, models),
     ncv3 = choose_outer_1se(e_1se, m_1se, models)
@@ -104,10 +105,10 @@ plot_ncv_selection <- function(summary_df, out_path) {
   png(out_path, width = 1400, height = 900, res = 120)
   par(mfrow = c(2, 2), mar = c(4, 4, 2.5, 1))
 
-  methods <- c("cv", "cv_1se", "cvc", "ncv1", "ncv2", "ncv3")
-  cols <- c("#1F77B4", "#17BECF", "#D62728", "#2CA02C", "#FF7F0E", "#9467BD")
-  pchs <- c(16, 15, 17, 18, 8, 3)
-  ltys <- c(1, 2, 1, 1, 2, 3)
+  methods <- c("cv", "cv_1se", "cvc", "ncv0", "ncv1", "ncv2", "ncv3")
+  cols <- c("#1F77B4", "#17BECF", "#D62728", "#7F7F7F", "#2CA02C", "#FF7F0E", "#9467BD")
+  pchs <- c(16, 15, 17, 4, 18, 8, 3)
+  ltys <- c(1, 2, 1, 1, 1, 2, 3)
 
   for (model_name in c("model1", "model2")) {
     for (sigma2 in c(1, 4)) {
@@ -179,6 +180,7 @@ run_sim1_ncv <- function(cfg) {
             list("cv", m_cv),
             list("cv_1se", m_cv1),
             list("cvc", cvc),
+            list("ncv0", ncv$ncv0),
             list("ncv1", ncv$ncv1),
             list("ncv2", ncv$ncv2),
             list("ncv3", ncv$ncv3)

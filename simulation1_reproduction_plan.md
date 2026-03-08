@@ -92,10 +92,10 @@
   - Figure 1 的最小可行复现方案；
   - 在类似设置下把 CVC 与 CV 的 FDR-MSE 放在同图比对的可行性方案。
 - 执行优先级：保持在 Simulation 1 主复现之后，作为并行扩展线。
-- 后续新增：在 ETFDR Figure 1 设定下接入 `ncv1`（外层5折、内层4折），
-  与 `cv/cvc` 及 `cv_1se/ncv1_1se` 竖线同图对照（复用已跑 `cv/cvc` 结果）。
+- 后续新增：在 ETFDR Figure 1 设定下接入 `ncv0/ncv1`（外层5折、内层4折），
+  与 `cv/cvc` 及 `cv_1se/ncv0_1se/ncv1_1se` 竖线同图对照（复用已跑 `cv/cvc` 结果）。
 
-## 10. 扩展任务：NCV 分层嵌套选模（ncv1/ncv2/ncv3）
+## 10. 扩展任务：NCV 分层嵌套选模（ncv0/ncv1/ncv2/ncv3）
 
 - 已新增专项文档：`docs/ncv_sim1_extension_plan.md`。
 - 按 5 折外层 + 4 折内层执行 nested cross-validation：
@@ -103,7 +103,8 @@
   - 内层仅在其余 2 折上做 CV 选模；
   - 外层 holdout 全程不参与内层选模。
 - 新增方法定义（按项目缩写）：
+  - `ncv0`：内层最优选模 + 外层检验误差最小（内外都不使用 `1se`）；
   - `ncv1`：内层 `1se` 选模 + 外层检验误差最小；
   - `ncv2`：内层最优选模 + 外层 `1se` 聚合；
   - `ncv3`：内层 `1se` + 外层 `1se`。
-- 对照图目标：与 `cv / cv_1se / cvc` 同图比较正确率曲线。
+- 对照图目标：与 `cv / cv_1se / cvc` 同图比较正确率曲线，包含 `ncv0` 新增曲线。
