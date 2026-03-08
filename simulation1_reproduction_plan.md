@@ -92,3 +92,16 @@
   - Figure 1 的最小可行复现方案；
   - 在类似设置下把 CVC 与 CV 的 FDR-MSE 放在同图比对的可行性方案。
 - 执行优先级：保持在 Simulation 1 主复现之后，作为并行扩展线。
+
+## 10. 扩展任务：NCV 分层嵌套选模（ncv1/ncv2/ncv3）
+
+- 已新增专项文档：`docs/ncv_sim1_extension_plan.md`。
+- 按 3 折外层 + 2 折内层执行 nested cross-validation：
+  - 外层每轮 1 折 holdout；
+  - 内层仅在其余 2 折上做 CV 选模；
+  - 外层 holdout 全程不参与内层选模。
+- 新增方法定义（按项目缩写）：
+  - `ncv1`：内层 `1se` 选模 + 外层检验误差最小；
+  - `ncv2`：内层最优选模 + 外层 `1se` 聚合；
+  - `ncv3`：内层 `1se` + 外层 `1se`。
+- 对照图目标：与 `cv / cv_1se / cvc` 同图比较正确率曲线。
