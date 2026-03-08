@@ -83,3 +83,12 @@
 - `results/sim1_table1_compare.csv`：与论文 Table 1 对照。
 - `figures/sim1_selection_rate.png`：正确选模率曲线。
 - `reports/sim1_repro_report.md`：复现结论与偏差分析。
+
+## 9. 扩展任务：ETFDR Figure 1（FDR-MSE）与 CVC/CV 对照
+
+- 已新增专项文档：`docs/etfdr_figure1_fdr_mse_plan.md`。
+- 本扩展聚焦：
+  - Figure 1 的 FDR 估计方法总结与优劣分析；
+  - Figure 1 的最小可行复现方案；
+  - 在类似设置下把 CVC 与 CV 的 FDR-MSE 放在同图比对的可行性方案。
+- 执行优先级：保持在 Simulation 1 主复现之后，作为并行扩展线。
