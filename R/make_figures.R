@@ -101,13 +101,18 @@ plot_sim1_nonrejected <- function(raw_df, out_path, alpha = 0.05) {
       (is.na(raw_df$alpha) | raw_df$alpha == alpha),
     c("model_name", "sigma2", "n", "method", "acv_size")
   ]
-  sm <- aggregate(acv_size ~ model_name + sigma2 + n + method, data = sub, FUN = mean)
+  sm_mean <- aggregate(acv_size ~ model_name + sigma2 + n + method, data = sub, FUN = mean)
+  sm_sd <- aggregate(acv_size ~ model_name + sigma2 + n + method, data = sub, FUN = sd)
+  names(sm_mean)[names(sm_mean) == "acv_size"] <- "mean_acv_size"
+  names(sm_sd)[names(sm_sd) == "acv_size"] <- "sd_acv_size"
+  sm <- merge(sm_mean, sm_sd, by = c("model_name", "sigma2", "n", "method"))
+  sm$sd_acv_size[is.na(sm$sd_acv_size)] <- 0
 
   for (model_name in c("model1", "model2")) {
     for (sigma2 in c(1, 4)) {
       cur <- sm[sm$model_name == model_name & sm$sigma2 == sigma2, ]
       x <- sort(unique(cur$n))
-      y_max <- max(cur$acv_size, na.rm = TRUE)
+      y_max <- max(cur$mean_acv_size + cur$sd_acv_size, na.rm = TRUE)
 
       plot(NA, xlim = range(x), ylim = c(0, max(1, y_max * 1.1)),
            xlab = "n", ylab = "Mean # Non-Rejected Models",
@@ -116,14 +121,22 @@ plot_sim1_nonrejected <- function(raw_df, out_path, alpha = 0.05) {
 
       cvc <- cur[cur$method == "cvc_pmax", ]
       cvc <- cvc[order(cvc$n), ]
-      lines(cvc$n, cvc$acv_size, type = "b", pch = 16, col = "#1F77B4", lwd = 2)
+      cvc_upper <- cvc$mean_acv_size + cvc$sd_acv_size
+      cvc_lower <- pmax(0, cvc$mean_acv_size - cvc$sd_acv_size)
+      polygon(c(cvc$n, rev(cvc$n)), c(cvc_upper, rev(cvc_lower)),
+              col = adjustcolor("#1F77B4", alpha.f = 0.18), border = NA)
+      lines(cvc$n, cvc$mean_acv_size, type = "b", pch = 16, col = "#1F77B4", lwd = 2)
 
       fy <- cur[cur$method == "fy", ]
       fy <- fy[order(fy$n), ]
-      lines(fy$n, fy$acv_size, type = "b", pch = 17, col = "#D62728", lwd = 2, lty = 2)
+      fy_upper <- fy$mean_acv_size + fy$sd_acv_size
+      fy_lower <- pmax(0, fy$mean_acv_size - fy$sd_acv_size)
+      polygon(c(fy$n, rev(fy$n)), c(fy_upper, rev(fy_lower)),
+              col = adjustcolor("#D62728", alpha.f = 0.16), border = NA)
+      lines(fy$n, fy$mean_acv_size, type = "b", pch = 17, col = "#D62728", lwd = 2, lty = 2)
 
       legend("topright",
-             legend = c("cvc (A_cv)", "fy (A_fy)"),
+             legend = c("cvc (mean ± 1 SD)", "fy (mean ± 1 SD)"),
              col = c("#1F77B4", "#D62728"),
              lty = c(1, 2),
              pch = c(16, 17),
