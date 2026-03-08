@@ -75,3 +75,8 @@ The final outputs should include:
 - reproduced figures
 - a summary report in README_repro.md
 - documented gaps in REPRO_GAP.md
+## Language Requirement
+
+All analysis, documentation and comments should be written in Chinese.
+
+Code should follow standard programming conventions, but explanations must be in Chinese.
