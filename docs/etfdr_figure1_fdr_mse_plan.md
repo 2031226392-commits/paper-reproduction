@@ -110,3 +110,16 @@
   - 新增 `configs/etfdr_fig1_config.R`
   - 结果落在 `results/etfdr_fig1_*` 与 `figures/etfdr_fig1_*`。
 
+## 7. 新增扩展：在 Figure 1 设定下接入 NCV1（5 折原则）
+
+- 目标：在不重跑 `cv/cvc` 的前提下，接入 `ncv1` 并同图展示：
+  - 三个模型：`cv`、`cvc`、`ncv1`；
+  - 两条 1se 线：`cv_1se`、`ncv1_1se`。
+- 折数原则：
+  - 外层 `5-fold` holdout；
+  - 内层 `4-fold` 仅在外层训练子集调参；
+  - holdout 不参与内层选参。
+- 输出：
+  - 冒烟图：`figures/etfdr_fig1_smoke_ncv1_overlay_figure.png`
+  - 全量图：`figures/etfdr_fig1_ncv1_overlay_figure.png`
+  - 选点结果：`results/etfdr_fig1*_ncv1_overlay_*.csv`

@@ -92,6 +92,8 @@
   - Figure 1 的最小可行复现方案；
   - 在类似设置下把 CVC 与 CV 的 FDR-MSE 放在同图比对的可行性方案。
 - 执行优先级：保持在 Simulation 1 主复现之后，作为并行扩展线。
+- 后续新增：在 ETFDR Figure 1 设定下接入 `ncv1`（外层5折、内层4折），
+  与 `cv/cvc` 及 `cv_1se/ncv1_1se` 竖线同图对照（复用已跑 `cv/cvc` 结果）。
 
 ## 10. 扩展任务：NCV 分层嵌套选模（ncv1/ncv2/ncv3）
 
