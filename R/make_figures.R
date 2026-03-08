@@ -123,17 +123,23 @@ plot_sim1_nonrejected <- function(raw_df, out_path, alpha = 0.05) {
       cvc <- cvc[order(cvc$n), ]
       cvc_upper <- cvc$mean_acv_size + cvc$sd_acv_size
       cvc_lower <- pmax(0, cvc$mean_acv_size - cvc$sd_acv_size)
-      polygon(c(cvc$n, rev(cvc$n)), c(cvc_upper, rev(cvc_lower)),
-              col = adjustcolor("#1F77B4", alpha.f = 0.18), border = NA)
       lines(cvc$n, cvc$mean_acv_size, type = "b", pch = 16, col = "#1F77B4", lwd = 2)
+      idx_cvc <- which(cvc_upper > cvc_lower)
+      if (length(idx_cvc) > 0) {
+        arrows(cvc$n[idx_cvc], cvc_lower[idx_cvc], cvc$n[idx_cvc], cvc_upper[idx_cvc],
+               angle = 90, code = 3, length = 0.05, col = "#1F77B4", lwd = 1.4)
+      }
 
       fy <- cur[cur$method == "fy", ]
       fy <- fy[order(fy$n), ]
       fy_upper <- fy$mean_acv_size + fy$sd_acv_size
       fy_lower <- pmax(0, fy$mean_acv_size - fy$sd_acv_size)
-      polygon(c(fy$n, rev(fy$n)), c(fy_upper, rev(fy_lower)),
-              col = adjustcolor("#D62728", alpha.f = 0.16), border = NA)
       lines(fy$n, fy$mean_acv_size, type = "b", pch = 17, col = "#D62728", lwd = 2, lty = 2)
+      idx_fy <- which(fy_upper > fy_lower)
+      if (length(idx_fy) > 0) {
+        arrows(fy$n[idx_fy], fy_lower[idx_fy], fy$n[idx_fy], fy_upper[idx_fy],
+               angle = 90, code = 3, length = 0.05, col = "#D62728", lwd = 1.4)
+      }
 
       legend("topright",
              legend = c("cvc (mean ± 1 SD)", "fy (mean ± 1 SD)"),
