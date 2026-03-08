@@ -1,0 +1,59 @@
+                                                                                                    JOURNAL OF THE AMERICAN STATISTICAL ASSOCIATION                   1991
+
+
+
+
+Figure 4. Simulation 2: Moderate-dimensional case (p = 200). Median risk for m cv (left), best model in Acv (middle), and worst model in Acv (right). Solid horizontal line
+represents the median risk for the true optimal model; dashed horizontal line represents the median risk for the standard cross-validation.
+
+
+
+
+set of 142 hold-out sample points to calculate the test error                           6. Concluding Remarks
+for the final estimate. We repeat this experiment 100 times,
+                                                                                        6.1. When to Use CVC?
+each time with an independent hold-out split. Similarly to the
+previous simulation, four values of α are experimented: α =                             As a generic model/tuning parameter selection tool, CVC has
+0.01 (cvc1), α = 0.05 (cvc2), α = 0.1 (cvc3), and α = 0.2                               many appealing features inherited from cross-validation. First,
+(cvc4).                                                                                 it is applicable to a wide range of statistical learning problems
+   The results are summarized in Figure 7. Comparing to the                             as long as one can define an appropriate loss function, which
+simulation results in Section 5.2, the diabetes dataset is more                         is often easy to identify given the context. On the contrary,
+similar to a low-dimensional model with sparse coefficients,                            classical methods such as BIC require likelihood functions.
+where more regularization can be used for better interpreta-                            Second, comparing to other model confidence set methods such
+tion without losing prediction accuracy. We see that the CVC                            as “fence” and hierarchical F-test, CVC does not rely on the
+method again is not sensitive to the choice of α. The mod-                              existence of a baseline fit, making it more suitable for high-
+els with largest λ in CVC confidence sets give very close test                          dimensional problems where it is hard to find such a baseline
+error as the standard cross-validation, but have much fewer                             fit without serious overfitting. CVC is essentially tuning-free as
+predictors. The 1se method is also very competitive, with even                          conventional choices of the number of folds and significance
+more interpretable estimates and a slightly larger predictive                           level work well in all of our examples. Finally, as a price to pay for
+risk.                                                                                   these appealing features, CVC does require a moderate sample
+1992         J. LEI
+
+
+
+
+Figure 5. Simulation 2: High-dimensional case (p = 2000). Median risk for   mcv (left), best model in Acv (middle), and worst model in Acv (right). Solid horizontal line
+represents the median risk for the true optimal model; dashed horizontal line represents the median risk for the standard cross-validation.
+
+
+
+
+size and computing resource for multiple rounds of bootstraps                          6.3. Further Extensions
+to realize its advantage.
+                                                                                       The wide applicability of cross-validation makes it worthwhile
+                                                                                       to further extend our understanding of CVC under other
+                                                                                       contexts. Several extensions can be pursued in future work.
+6.2. Combining CVC With Model Averaging                                                First, it would be interesting to study and extend CVC for
+Model averaging has been used to combine the outputs of                                high-dimensional regression model selection problems. Sec-
+estimates from a collection of models to achieve better pre-                           ond, in our consistency analysis of sparse linear regression in
+dictive or estimation accuracy (Yuan and Yang 2005; Dalalyan                           Section 4.2, we considered independent noise. If the response
+and Tsybakov 2007; Ye, Yang, and Yang 2018). A hybrid                                  variable is binary, then we need to extend the theory to cover
+method would be applying model averaging/aggregating meth-                             heteroscedastic noises. Moreover, it is also possible to extend
+ods only to the models in the CVC confidence set. Since CVC                            the framework of CVC to unsupervised learning problems. For
+screens out suboptimal candidate models. A potential advan-                            example, in K-means or model-based clustering, one needs to
+tage would be improved interpretability, as the final output                           specify the number of clusters. Given a set of estimated clusters,
+involves a much smaller number of individual fits. It would                            the value of loss function at a test sample point can be set as the
+be interesting to design and investigate such hybrid estimators                        squared distance to the closest cluster center. Similar extensions
+and study the theoretical and practical properties in future                           can also be made in low rank matrix approximation using singu-
+works.                                                                                 lar value decompositions (Owen and Perry 2009) and network
+

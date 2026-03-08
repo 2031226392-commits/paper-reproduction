@@ -1,0 +1,407 @@
+                                                                                 JOURNAL OF THE AMERICAN STATISTICAL ASSOCIATION        1981
+
+
+In practice, we do not have Qcv (m) and have to approximate it         the estimates    f0 has no uncertainty and we almost surely have
+using sample-split validated predictive risk of 
+                                                 (v)
+                                                fm and average         Q(f0 ) < Q( f1 ).
+over v = 1, . . . , V:                                                     In this example, there is no estimation error under the true
+                                                                       model, and the only source of error comes from the variability
+                        1   (v)
+                           V
+                                                                      of testing sample average ¯te . We cannot expect V-fold cross-
+              Qcv (m) =       (fm (Xi ), Yi ) ,
+                        n v=1                                          validation to fix this issue, since V-fold averaging only reduces√
+                                   i∈Iv
+                                                                       the uncertainty of testing sample average by a factor of V.
+and the best candidate is estimated by                                 Increasing the value of V cannot help either, because the vari-
+                                                                       ability of each single fold testing sample average increases with
+                     cv = arg min 
+                     m             Qcv (m) .                    (3)    V. In fact one can show that the probability of overfitting
+                                 m∈M
+                                                                       is bounded away from 0 for all values of V if V-fold cross-
+Five-fold cross-validation improves upon sample-split valida-          validation is used in Example 1.
+tion by averaging the approximate predictive risk of V different           In the context of model selection, one way to account for vali-
+estimates {
+              (v)
+            fm : 1 ≤ v ≤ V}, which provides a more                     dation uncertainty is to use a training-validation split ratio close
+comprehensive assessment by exploring the variability of   fm due     to zero. In the context of Example 1, the results in Shao (1993),
+to the randomness of fitting sample. This can be more clearly          Zhang (1993), and Yang (2007) suggest that m      ss is consistent if
+seen if we rewrite 
+                   Qcv as follows.                                     and only if ntr /n → 0. The intuition is that ¯te = OP (nte ),
+                                                                                                                                      −1/2
+                           ⎡                              ⎤                                                             −1/2
+                      V      n −1                                   much smaller than      μ , which has the order ntr .
+                    1
+        Qcv (m) =         ⎣          (fm(v) (Xi ), Yi )⎦                Although choosing a vanishing training ratio can theoreti-
+                    V v=1      V                                       cally address the problem of validation uncertainty for model
+                                          i∈Iv
+                                                                       selection, it is practically undesirable to fit the models with
+                     1  
+                        V
+                 ≈         Q(
+                             fm(v) ) ,                                 a much smaller sample size. Indeed, the required split ratio
+                     V v=1                                             cannot be achieved by any conventional V-fold cross-validation.
+                                                                       More importantly, using a vanishing training sample ratio
+where each term (n/V)−1              (v)                 (v)
+                              i∈Iv (fm (Xi ), Yi ) := Qss (fm ) is    may become problematic in the context of tuning parameter
+the sample-split validated predictive risk of
+                                              (v)                      selection and risk minimization. A common practice of cross-
+                                             fm , which is close to
+Q(fm ) by law of large numbers. While both 
+    (v)
+                                              Qss (
+                                                   fm ) and 
+                                                            Qcv (m)    validation in tuning parameter selection is to apply the fitting
+are unbiased estimates of the overall predictive risk if we use        procedure on the entire dataset with the chosen tuning parame-
+model (or tuning parameter index) m to estimate f , the latter         ter as a final output. In many important cases, such as bandwidth
+often has much smaller variance.                                       selection for nonparametric regression (Tsybakov 2009), and
+   The extreme case of V = n is known as the leave-one-out             choosing λ for the Lasso (Dalalyan, Hebiri, and Lederer 2017),
+cross-validation. In modern applications, it is often expensive        the optimal tuning parameter may depend on the sample size.
+and unnecessary to refit the model n times, so most statisti-          Therefore, if nte /n → 0, then the optimal λ for a training sample
+cal packages use 10-fold or V-fold cross-validation as default         of size nte is unlikely to be a good choice when applied to the
+choices.                                                               entire sample.
+
+
+2.3. Validation Uncertainty                                            3. Cross-Validation With Confidence
+
+We start our discussion from a simple example.                         Now we describe cross-validation with confidence, a procedure
+                                                                       that accounts for the validation uncertainty without sacrificing
+Example 1. Let Y = μ+ where  ∼ N(0, 1). The covariate X is           the training sample size. Our discussion starts from the simpler
+irrelevant here. Let M = {0, 1} where m = 0 corresponds to the         sample-split validation and then extends to the V-fold cross-
+model μ = 0 so      f0 ≡ 0, and m = 1 corresponds to the model        validation.
+μ ∈ R so    f1 (x) ≡ μtr with 
+                                μtr being the training sample mean
+of Y. We consider the squared error loss. Now assume μ = 0,
+                                                                       3.1. Sample-Split Validation With Hypothesis Testing
+then f0 is always a better estimate than f1 . But
+                                                                       Here, we consider sample-split validation and focus on the
+               Qss (
+                          Qss (
+                    f1 ) −            μ2tr − 2
+                                f0 ) =        μtr ¯te ,              conditional inference given the candidate estimates {   fm : m ∈
+                                                            √          M} obtained from training data Dtr . Recall that we evaluate a
+where ¯te is the testing data sample mean of . Because ntr    μtr
+     √
+and nte ¯te are independent standard normal random vari-                           f by Q(
+                                                                       fitted model       f ) = E((
+                                                                                                     f (X), Y) | Dtr ). For each m ∈ M,
+                                                                       define random vector ξm = (ξm,j : j = m) as
+                                          Qss (
+ables, there is positive probability that            Qss (
+                                               f1 ) −     f0 ) < 0.
+This probability becomes larger when nte is smaller.                                            fm (X), Y) − (
+                                                                                       ξm,j = (              fj (X), Y),               (4)
+   In Example 1, sample-splitting validation makes decision            where (X, Y) is a fresh independent sample from the same joint
+based on the sign of Qss (      Qss (
+                           f1 ) −     f0 ), which contains a true     distribution. Let μm,j = E(ξm,j | Dtr ). We consider a hypothesis
+            μtr and a noise part −2
+signal part 2                        μtr ¯te . Overfitting happens   testing problem
+if the noise overrides the signal. In this example, it is the                 H0,m : max μm,j ≤ 0 versus H1,m : max μm,j > 0 .           (5)
+uncertainty in the validation step that causes the error, since                       j=m                             j=m
+1982       J. LEI
+
+
+The hypothesis H0,m means that the fitted model     fm has the best     The Gaussian comparison and bootstrap results automatically
+predictive risk among all fitted models, and H1,m means that             take into account of the dimensionality and correlation between
+there exists another fitted model whose predictive risk is strictly      coordinates of ξm . The studentization addresses the issue of
+less than 
+          fm .                                                           scaling difference. A similar studentized Gaussian approxima-
+   Let α ∈ (0, 1) be a pre-chosen level of Type I error. If we have      tion has been considered in an unpublished manuscript (Cher-
+obtained a p-value, denoted by pss,m , for the testing problem (5)      nozhukov, Chetverikov, and Kato 2013b) for different applica-
+for each m, the CVC procedure outputs the confidence set                 tions.
+
+                    Ass = {
+                           fm : m ∈ M, 
+                                       pss,m > α},                 (6)
+                                                                         3.2. Five-Fold Cross-Validation With Confidence
+which contains all the fitted models for which H0,m is not
+                                                                         To develop the V-fold version of the above hypothesis testing
+rejected.
+                                                                         procedure, a main challenge is the dependence between the
+                                                                         fitted models  fm and the validated predictive loss (
+                                                                                          (v)                                          (v)
+                                                                                                                                      fm (Xi ), Yi )
+3.1.1. Calculating the p-Values
+                                                                         (i ∈ Iv ).
+Equation (5) is a multivariate mean testing problem. There are
+                                                                             To illustrate the issue, the conditional inference for sample-
+a few challenges. First, the dimensionality can be high, as the
+                                                                         split validation is based on the fact that the validated predictive
+number of candidate models or tuning parameter values can
+                                                                         losses
+be on the order of hundreds. Second, the coordinates of ξm are                                                            
+often highly correlated, since they are calculated from prediction                      (fm (Xi ), Yi ), m = 1, . . . , M , i ∈ Ite
+errors of similar models fitted from the same training data and
+evaluated on the same testing data. Third, the coordinates of ξm         are conditionally independent given the training data. But in V-
+usually have vastly different scaling, depending on the similarity       fold cross-validation we cannot condition on the training data
+between model j and model m. For example, suppose we are                 anymore because each fold is used both as testing and part of
+considering linear regression with √ squared error as the loss           the training data. More precisely, for 1 ≤ i < i ≤ n, let i ∈ Iv
+             fm and 
+function, if         fj are both n-consistent then ξm,j has a           and i ∈ Iv . There are two possibilities.
+                                           √
+variance of order O(n−1 ). But if   fm is n-consistent and    fj is
+                                                                           Case 1. v = v . This is similar to the sample-split case,
+seriously underfitting (e.g., a linear model missing a relevant
+                                                                           the dependence between (     fm (Xi ), Yi ) and (
+                                                                                                           (v)                     (v)
+variable, or Lasso with a very large λ), then the variance of ξm,j                                                               fm (Xi ), Yi )
+                                                                           comes from 
+                                                                                           (v)
+can be as large as a constant.                                                            fm . They are conditionally independent given
+    Considering all these challenges, we derive our test statis-           fm . We denote this conditional distribution of (
+                                                                           (v)                                                     (v)
+                                                                                                                                   fm (Xi ), Yi )
+tic and p-value using a recent result of Gaussian comparison               given    (v)  m .
+                                                                                    fm as L (v)
+
+and bootstrap of high-dimensional sample means due to Cher-                Case 2. v = v . Now (      fm (Xi ), Yi ) and (
+                                                                                                          (v)                     (v )
+                                                                                                                                fm (Xi ), Yi )
+nozhukov, Chetverikov, and Kato (2013a), which provides an                 depend on each other in that (Xi , Yi ) is used as a training
+accurate approximation of the maximum of a high-dimensional
+                                                                           sample point in the construction of  fm(v ) , and (Xi , Yi ) is used
+sample mean using the maximum of a corresponding Gaussian
+                                                                           in 
+                                                                              fm . Moreover,   fm and 
+                                                                                (v)              (v)    (v )
+random vector.                                                                                         fm share the same (1 − 2/V)n out
+    The p-value 
+                pss,m is calculated as follows, using a studentized        of a total of (1 − 1/V)n training sample points.
+Gaussian multiplier bootstrap approach.
+                                                                         In the second case described above, (       fm (Xi ), Yi ) and (
+                                                                                                                         (v)                    (v )
+                                                                                                                                            fm
+                       (i)
+1. For i ∈ Ite , let ξm be the realization of ξm on the testing data     (Xi ), Yi ) are not independent samples from Lm and Lm    (v)     (v )
+
+                                                                         due to the dependence between (Xi , Yi ) and 
+   point (Xi , Yi ):                                                                                                             (v  )
+                                                                                                                               fm (as well as
+                                                                                          (v)                       
+                                                                         (Xi , Yi ) and fm ). Intuitively, since fm is a fitting procedure
+                               (i)
+                    ξm(i) = (ξm,j : j = m) where                         obtained from (1 − 1/V)n sample points, it seems reasonable to
+                    ξm,j = (
+                             fm (Xi ), Yi ) − (                        believe that the dependence between (Xi , Yi ) and 
+                     (i)                                                                                                               (v )
+                                                fj (Xi ), Yi ) .                                                                     fm is weak,
+                                                                         so that we can practically ignore such a dependence and treat
+2. For each j = m, let   μm,j and σm,j be the sample mean and          (
+                                                                           fm (Xi ), Yi ) and (
+                                                                            (v)                  (v )
+                                                                                                fm (Xi ), Yi ) as if they were independent
+                            (i)
+   standard deviation of {ξm,j : i ∈ Ite }.                              samples from L   m and L
+                                                                                            (v)    m(v )
+                                                                                                          , respectively.
+                        √ μm,j
+3. Let T = maxj=m nte     σm,j .
+4. For b = 1, . . . , B                                                  3.2.1. Approximate p-Value for V-Fold CVC
+                                                                                                                                     (v)
+                                                                         Following the intuition described above, for 1 ≤ v ≤ V, let L
+   (a) Generate iid standard Gaussian random variables ζi , i ∈          denote the joint conditional distribution of
+       Ite .                                                                                                           
+   (b) Let                                                                                  (
+                                                                                              fm(v) (X), Y) , 1 ≤ m ≤ M
+                                      (i)
+                                 1  ξm,j − μm,j
+                                                                         given (
+                                                                                  (v)
+                                                                                fm , 1 ≤ m ≤ M). The we proceed by treating the cross-
+                      Tb∗ = max √                 ζi .
+                            j=m  nte      
+                                          σm,j                           validated predictive loss
+                                           i∈Ite
+                                                                                                                         
+   pss,m = B−1
+5.                    B      ∗                                                    i := (                                 (vi )
+                                                                                            f (vi ) (Xi , Yi )), 1 ≤ m ≤ M ∼ L
+                       b=1 1(Tb > T).                                                          m
+                                                                                      JOURNAL OF THE AMERICAN STATISTICAL ASSOCIATION      1983
+
+
+as independent samples from the distributions L   (vi ) , where vi          3.3. Computational Complexity of CVC
+is the fold id that the ith sample point belongs to. Now we can
+                                                                             The V-fold CVC consists of two main parts. The first part is
+extend the hypothesis testing and p-value calculation developed
+                                                                             to split the sample, compute the estimates by holding out each
+for sample-splitting to V-fold cross-validation by taking out the
+                                                                             fold, and compute the cross-validated predictive loss for each
+group mean effects.
+                                                                             sample point. This part is also required in ordinary V-fold cross-
+    For m ∈ M, the V-fold version of the hypothesis testing
+                                                                             validation. The additional computing required by CVC is in the
+problem becomes
+                                                                             second part, where the approximate p-values are calculated for
+                1  (v)       1  (v)
+                   V              V                                          each candidate model or tuning parameter value. In this step,
+   H0,m :             Q(fm ) ≤       Q(fj ), ∀ j = m                   (7)   for each m ∈ M, the algorithm will calculate the difference of
+                V v=1          V v=1
+                                                                             predictive loss between m and all the other M − 1 candidates.
+      versus                                                                 This requires O(n(M − 1)) subtractions of two real numbers.
+                                                                             The recentering and standardization costs another O(n(M −
+                1  (v)       1  (v)
+                   V              V
+   H1,m :             Q(fm ) >       Q(fj ) for some j = m .                 1)) operations. The multiplier bootstrap with bootstrap sample
+                V v=1          V v=1                                         size B will require O(n(M − 1)B) operations. Thus, the total
+   The p-values are calculated as follows.                                   additional computing complexity of CVC is O(nM 2 B). This
+                                                                             additional cost is independent of the dimensionality of the
+1. Define, for all j ∈ M\{m},                                                problem. In our numerical experiments, the total running time
+               fm(vi ) (Xi ), Yi ) − (
+      ξm,j = (
+          (i)                          (v )
+                                       fj i (Xi ), Yi ), 1 ≤ i ≤ n .   (8)   of CVC is usually a few (<5) seconds when n is a few hundreds,
+                                                                             M = 50, and B = 200. This is comparable to other model
+    (v)                 (i)
+   μm,j = Vn i∈Iv ξm,j , for all j = m, 1 ≤ v ≤ V. These are the
+2.                                                                          selection methods based on bootstrap and resampling methods
+   estimated group mean effects.                                             such as the “fence” method (Jiang et al. 2008). The bootstrap
+    (i)
+3. ξm,j     (i)
+        = ξm,j  −(vi )
+                 μm,j   , for all j = m 1 ≤ i ≤ n. These are group-          sample size B = 200 works well in our experiments, but can be
+   wise centered difference of cross-validated predictive loss.              increased according to the availability of computing resources.
+4. Let μm,j = V −1 V          μ(v)
+                           v=1   m,j be the overall mean effect and
+                                                      (i)
+                                                                             3.4. Interpretation and Practical Choice of Significance
+   
+   σm,j be the sample standard deviation of {ξm,j : 1 ≤ i ≤ n}.                   Level α
+                        √ 
+                          μm,j
+5. Let T = maxj=m n      σm,j .                                             The main output of the CVC algorithm is the p-values associated
+6. For b = 1, . . . , B                                                      with each candidate model. As we show in the next section, these
+  (a) Generate iid standard Gaussian random variables ζi , 1 ≤               p-values are coherent with the frequentist hypothesis testing
+      i ≤ n.                                                                 framework, with valid Type I error control, and hence the corre-
+  (b) Let                                                                    sponding coverage guarantee of the resulting (1−α) confidence
+                                                                             set. When α is small, the confidence set is less likely to miss the
+                                                 μ(v)
+                                     V  ξ (i) − 
+                                     
+                               1          m,j     m,j                        optimal candidate but tends to include more candidates. When
+                    Tb∗ = max √                             ζi .
+                          j=m   n    v=1 i∈Iv
+                                                   
+                                                   σm,j                      α is large, the confidence set gets smaller but potentially more
+                                                                             likely to miss the optimal one.
+   pcv,m = B−1
+7.                   B      ∗
+                      b=1 1(Tb > T).                                            In our theoretical development in Section 4.2, we need α to
+The level α confidence set of candidate models corresponding                 be asymptotically vanishing so that we include the best candi-
+to the testing problem (7) is                                                date with probability tending to one. However, in simulation
+                                                                             we observe that the actual Type I error is usually lower than
+                     Acv = {m ∈ M : 
+                                    pcv,m ≥ α}.                              the nominal level α. This is because the null hypothesis H0,m :
+   The way we compute    pcv,m guarantees that the Acv is non-              μm,m ≤ 0 ∀ m = m is composite, and the nominal level
+empty, and also reveals the relationship between standard cross-             is achieved only at the extreme point of the null hypothesis:
+validation and CVC.                                                          μm,m = 0 ∀ m , where all the models have the same predictive
+                                                                             quality.
+Proposition 1. If α < 0.5, then                                                 Given a set of candidates M = {1, . . . , M} with m∗ being the
+                       lim P (
+                              mcv ∈ Acv ) = 1 ,                              optimal one, which may or may not be unique, we can divide
+                      B→∞                                                    M\{m∗ } into two subsets M1 and M0 , where M1 contains
+      cv is the standard cross-validation output given in (3).
+where m                                                                      the candidate models that are substantially inferior to m∗ , and
+                                                                             the candidate models in M0 are close to or equally good as
+                        cv , we always have T ≤ 0. Because
+Proof. Be definition of m                                                    m∗ . When H0,m∗ is being tested, a natural idea to adapt the
+α < 0.5, the upper α quantile of the maximum of a zero-mean                  p-value by comparing   fm∗ with  fm only for m ∈ M0 . This
+Gaussian vector (Tb∗ ) must be positive. The claim then follows              can be achieved by eliminating “obviously” inferior candidate
+from the weak law of large numbers.                                          models before conducting the bootstrap, at the cost of a slightly
+                                                                             higher Type I error probability. Due to the reduced data used
+   Following the same reasoning, we can see that among all m ∈               in the bootstrap, such an elimination step will also be more
+M, the test statistic T is only nonpositive when m is the cross-             computationally efficient. The method, originally invented by
+                                          cv almost always gives
+                  cv . Thus, empirically m
+validation choice m                                                          Chernozhukov, Chetverikov, and Kato (2013b), is detailed in
+the largest p-value among all candidate models.                              Section 3.5.
+1984      J. LEI
+
+
+   In the construction of confidence sets, the significance level    3.5.1. CVC p-Value Calculation With Inequality Selection
+α is set by the user according to the desired level of coverage.     1 –4 The same as steps 1–4 as given in Section 3.2.
+As we see in Section 4.2, one can also use the CVC confidence                                   √ 
+                                                                                                  μm,j
+                                                                     5     Let T = maxj∈Jm n    σm,j .
+set to perform model selection. In this case, the significance
+                                                                     6     For b = 1, . . . , B
+level can be viewed as a tuning parameter for model selection.
+If we do view α as a tuning parameter for model selection, it              (a) Generate iid standard Gaussian random variables ζi ,
+has several appealing properties. First, the range of α values                 1 ≤ i ≤ n.
+allowing for consistent model selection does not depend on                 (b) Let
+                                                                                                                      (i)    (v)
+unknown model parameters, such as the noise variance. In                                             1   ξm,j − 
+                                                                                                         V         μm,j
+contrast, the lasso penalty parameter needs to be proportional to                        Tb∗ = max √                    ζi .
+                                                                                               j∈Jm  n v=1 i∈I 
+                                                                                                                σm,j
+the noise standard deviation to have good performance. Second,                                                    v
+the theoretical range of α makes natural implications that agree     7     pcv,m = B−1
+                                                                                            B      ∗
+                                                                                             b=1 1(Tb > T).
+with common practice. For example, if we choose α = n−1/2 ,
+which is allowed when M = o(n1/2 ), then α ranges from 0.1           In practice, we set α = α/10. In the rare case J = ∅,
+when n = 100 to 0.01 when n = 106 , which are among some             which corresponds to the case that m is “obviously” better than
+conventional choices of the significance level. Third, the practi-   all competitors, then we can set    pcv,m = 1. The potential
+cal performance of the proposed method is not very sensitive to      downside of this approach is the increased Type I error incurred
+the choice of α. In our numerical examples, consistency can be       in the screening step. In the next section, we further discuss the
+achieved for different choices of α as long as the sample size is    theoretical validity of this method.
+large.
+   Practically, given the natural conservativeness of CVC p-
+                                                                     4. Theoretical Properties
+values, it is recommended to use slightly larger values of α (such
+as α = 0.1 or 0.2) for discrete model selection, because the         In our theoretical analysis, we first investigate the risk minimiza-
+number of truly competitive models is usually much smaller           tion properties of the CVC confidence sets Ass and Acv . Then
+than the total number of candidates. For continuous tuning           we consider variable selection using the CVC method for linear
+parameter selection, it is likely that many tuning parameters        models.
+in a small neighborhood are equally good. We recommend to               We always assume that the test sample size is proportional to
+use smaller values of α, such as the conventional choice of          the total sample size: nte /n ∈ [δ, 1 − δ] for some δ ∈ (0, 1/2).
+α = 0.05, though in our simulations other values such as α =         This is satisfied for each fold in the V-fold cross-validation with
+0.01 performed almost equally well. In the simulation studies,       a constant V.
+we demonstrate the effect of using CVC with different values
+of α.
+                                                                     4.1. Risk Minimization Properties
+                                                                     4.1.1. Sample-Split Validation Analysis
+3.5. Adaptation and Acceleration Using Inequality
+                                                                     In the analysis of sample-split validation, we condition on the
+     Selection
+                                                                     fitted models { fm : m ∈ M}. Our main technical assumption
+The extra computing complexity of CVC has a quadratic depen-         is the tail behavior of the difference of prediction loss ξm,j =
+dence on M, the total number of candidate models or tuning           (fm (X), Y) − (
+                                                                                       fj (X), Y), where the randomness is in the future
+parameter values. This additional cost can be substantial when       data pair (X, Y). We assume sub-exponential tail probabilities
+M is large. However, when M is large, it is more likely a large      for standardized ξm,j , characterized by the Orlicz ψ1 norm.
+proportion of candidate models or tuning parameters will lead        Given a ≥ 1, the Orlicz ψa norm of a random variable Z is
+to poor estimates. Thus, it is possible to eliminate such mod-                                                  a           
+                                                                                                                   |Z|
+els quickly without using bootstrap by applying the inequality                  Zψa = inf C > 0 : E exp                  ≤2 .
+                                                                                                                    C
+screening method developed in Chernozhukov, Chetverikov,
+and Kato (2013b).                                                    Having a finite Orlicz ψ1 norm is equivalent to having a sub-
+    More specifically, fix α ∈ (0, 1), and for each m ∈ M, define    exponential tail, and implies finite moments of all orders and
+                                                                     exponential concentration of sample mean. A finite Orlicz ψ2
+            
+                        √ μm,j                                      norm is equivalent to a sub-Gaussian tail. See van der Vaart and
+       Jm = j ∈ M\{m} : n                                           Wellner (1996) and van de Geer and Lederer (2013) for further
+                           
+                           σm,j
+                                                                    discussion on the Orlicz norm.
+                             −1 (1 − α /(M − 1))
+                                                                         Following common practice, our analysis of the multiplier
+              ≥ −2                                          ,
+                       1−[    −1 (1 − α /(M − 1))]2 /n               bootstrap assumes that B is large enough so the bootstrap sam-
+                                                                     pling variability is negligible. That is, we takepss,m as the limiting
+where is the standard normal cumulative distribution func-           value when B → ∞.
+tion.
+   Intuitively, the candidates in Jmc are “obviously” inferior to                                  fm ,
+                                                                     Theorem 1. Let μm,j = E(ξm,j |           2 = var(ξ
+                                                                                                        fj ), σm,j              
+                                                                                                                         m,j | fm , fj ).
+m and there is no need to invoke the bootstrap comparison for        Assume                           
+                                                                                          ξm,j − μm,j 
+these models. As a result, one can modify the last three steps of                        
+                                                                                     sup               ≤ An ,                     (9)
+                                                                                               σ       
+the CVC p-value calculation as follows.                                                  m=j         m,j     ψ1
+

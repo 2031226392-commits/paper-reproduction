@@ -1,0 +1,79 @@
+                                                                                                      JOURNAL OF THE AMERICAN STATISTICAL ASSOCIATION                 1993
+
+
+                                                                                        compact notation and under the assumption of bounded Orlicz ψ1
+                                                                                        norm for (ξm,j − μm,j )/σm,j . Finally, the unnumbered constants c, c
+                                                                                        may vary from line to line. Numbered constants, c1 , c2 , c3 , C, C1 , C2 ,
+                                                                                        etc., correspond to those specified in corresponding theorems. In the
+                                                                                        proof, we use let N = M ∨ n.
+
+                                                                                        Lemma 2. There exist universal positive constants c1 , c2 such that if
+                                                                                        (9) holds with (A2n + 1) ≤ c1 n/ log N then the following holds.
+                                                                                                                                        
+                                                                                                                              
+                                                                                                        μm,j − μm,j 
+                                                                                               P max                  ≥ c2 An log N/n ≤ N −1 ,         (A.1)
+                                                                                                   m=j       σm,j    
+                                                                                                             2                          
+                                                                                                                               
+                                                                                                              σm,j    
+                                                                                                   P max  2 − 1 ≥ c2 A2n log N/n ≤ N −1 ,              (A.2)
+                                                                                                       m=j  σm,j      
+                                                                                                                                            
+                                                                                                                                   
+                                                                                                                          
+                                                                                           P     max     m;j,j − m;j,j  ≥ c2 A2n log N/n ≤ N −1 , (A.3)
+                                                                                                m=j,m=j
+
+                                                                                        where m;j,j is the correlation coefficient between ξm,j and ξm,j , and
+                                                                                        
+                                                                                        m;j,j is the empirical version obtained from the testing sample.
+
+                                                                                        Proof of Lemma 2. Since a smaller An means better concentration,
+                                                                                        without loss of generality we can assume that An ≥ 1. In the proof,
+                                                                                        we drop the subindex m for simplicity.
+Figure 6. Diabetes data example. The cross-validation test errors for 50 values of λ.
+The triangles correspond to the λ values in Acv given by V-fold CVC with α = 0.05.         The first inequality directly follows from the fact that Zψ1 ≤
+The solid triangle corresponds to the λ chosen by standard V-fold cross-validation.     Zψ2 , the Bernstein’s inequality using Orlicz norm (van der Vaart and
+                                                                                        Wellner 1996, Lemma 2.2.11), and union bound.
+                                                                                           For the second inequality, note that
+community detection (Chen and Lei 2018), where various forms                                                       1/2 
+                                                                                                                                   
+of cross-validation can be used for model selection.                                              ξ − μ 2                    ξ − μ 
+                                                                                                  j       j                   j     j
+                                                                                                                − 1  ≤                + 1ψ1
+                                                                                                      σj                      σj 
+                                                                                                                                         ψ1
+                                                                                                                               ψ1
+Appendix A: Proofs                                                                                                                  = An + (log 2)−1 .               (A.4)
+A.1. Proof of Section 4.1
+                                                                                                           σj2 /σj2 − 1 as
+                                                                                            We can rewrite 
+In the construction of our p-value  pm , the main test statistic is the                                         ⎡⎛             ⎤
+                                                  (i)                                                                      ⎞2                2
+maximum of the studentized sample mean of (ξm : i ∈ Ite ). The                               σj2 − σj2
+                                                                                             
+                                                                                                                    (i)
+                                                                                                                ⎢ ξj − μj            
+                                                                                                                                      μj − μj
+                                                                                                            −1                  ⎥
+reference distribution is the maximum of a Gaussian vector with covari-                                  = nte   ⎣⎝        ⎠ − 1⎦ −              .
+ance 
+                                              (i)
+      m , the sample correlation matrix of (ξm : i ∈ Ite ). Therefore,                         σj2              i∈Ite
+                                                                                                                        σj               σj
+the main task is to prove that the maximum of a studentized sample
+mean has similar distribution as the maximum of a Gaussian random                       Then the claim follows by applying Cramer’s moderate deviation (see,
+vector with same covariance structure. A result of this type is given                                                                                   and
+                                                                                        e.g., de la Peña, Lai, and Shao 2008, Theorem 2.13) with centered
+as part of the proof of Theorem 4.3 of Chernozhukov, Chetverikov,                       scaled random variable A−2             2 2
+                                                                                                                   n [(ξj −μj ) /σj −1] and deviation c log N,
+and Kato (2013b). Here, we provide a self-contained proof using more                    together with (A.1) and union bound.
+
+
+
+
+                                                                                                                                                           cvc and the best
+Figure 7. Diabetes data example. Left: Hold-out test errors; middle: number of active predictors in the final estimate; right: median predictive error for m
+and worst models in Acv , with optimal model (solid horizontal line) and standard cross-validation (dashed horizontal line) as benchmarks.
+

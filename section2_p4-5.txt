@@ -1,0 +1,185 @@
+1980       J. LEI
+
+
+Yang, and Yang (2018) developed a variable importance mea-             one can choose the largest λ to be 1. Moreover, we empiri-
+sure, called SOIL, by aggregating sparse estimates obtained            cally observe that the performance of our proposed method
+from a collection of different models using data-driven adaptive       is not affected even using the default choice of the set of λ
+weighting. These variable importance measures can provide              values.
+useful guidance in constructing interpretable models with good            The basic idea of cross-validation originates from estimating
+predictive accuracy. The difference is that cross-validation, as       the predictive risk using an independent sample. First, we split
+well as CVC, aims at finding the correct amount of regulariza-         the index set {1, . . . , n} randomly into a training set Itr and a
+tion (in the context of tuning parameter selection) or the most        testing set Ite = Itrc . The data are correspondingly split into
+appropriate approximation to the data generating mechanism             a training data Dtr = {(Xi , Yi ) : i ∈ Itr } and a testing data
+(in the context of discrete model selection) from a candidate          Dte = {(Xi , Yi ) : i ∈ Ite }. For each candidate model m, we obtain
+set. Nevertheless, we do believe that CVC can be combined with         an estimate fm using Dtr . The quality of fm is approximated using
+some of the methods mentioned above. See Section 6 for further         the empirical average loss on Dte :
+discussion.
+                                                                                                     1  
+                                                                                        Qss (
+                                                                                            fm ) =     (fm (Xi ), Yi ) ,
+                                                                                                    nte
+2. Review of Cross-Validation                                                                            i∈Ite
+
+Suppose we have data D = (Xi , Yi )ni=1 independently drawn            where nte is the size of Dte . Finally, we choose the model that
+from a common distribution P on Rp × R satisfying                      gives the smallest empirical risk on testing data:
+
+                         Yi = f (Xi ) + i ,                                                               Qss (
+                                                                                             ss = arg min 
+                                                                                             m                  fm ) .                      (1)
+                                                                                                           m
+where f : Rp → R is an unknown function and  satisfies E( |
+X) = 0. We are interested in finding an approximation of f so          Here, the subscript “ss” stands for sample splitting.
+that we can predict the values of Y for future observations of            Conditioning on the sample split and the training data
+       f be an estimate of f . We evaluate the quality of 
+X. Let                                                   f by the     Dtr , the law of large numbers implies that     Qss (
+                                                                                                                             fm ) is close
+                                                                             
+                                                                       to Q(fm ). Therefore, sample-splitting validation approximately
+predictive risk
+                                                                     minimizes the predictive risk over all candidate estimates
+                     f ) = E (
+                   Q(           f (X), Y) | 
+                                             f ,                       {
+                                                                        fm : m ∈ M}.
+
+where (X, Y) is a future random draw from P, and (·, ·) is a loss     2.1.2. Sources of Uncertainty in Sample-Splitting Validation
+                                                             y, y) =
+function. A typical example of (·, ·) is the squared loss (         From (1), we can see that there are two separate sources of
+ y − y)2 .
+(                                                                     uncertainty when using m   ss as our estimate of the best m. First,
+                                                                       the estimates   fm are obtained from a finite sample Dtr , which
+                                                                       may not be representative for the overall performance of        fm
+2.1. Validation by Sample Splitting                                    when taking into account the randomness of Dtr . We call it the
+Here, we describe cross-validation using a unified notation for        estimation uncertainty.
+both tuning parameter selection and model selection. Suppose               The second source of uncertainty comes from using     Qss (
+                                                                                                                                       fm )
+                                                                                            
+                                                                       to approximate Q(fm ). This is a typical approximation error of
+we are given a finite set of candidates M = {1, 2, . . . , M}, where
+the meaning of each m ∈ M can be a model or a tuning                   sample mean, and the randomness is in the testing data Dte . We
+parameter value, depending on the context. For each m ∈ M              call it the validation uncertainty.
+one can estimate f by fm using an estimating procedure specified
+by m.                                                                  2.2. Reducing the Estimation Uncertainty: V-Fold
+                                                                            Cross-Validation
+2.1.1. Examples of M
+In this work, we assume that M is pre-chosen and does not              Five-fold cross-validation extends the idea of sample splitting
+depend on the data. In the context of discrete model selection,        by repeatedly fitting each candidate model on different subsets
+the set M can index the degree of polynomials in polyno-               of the data. Five-fold cross-validation first divides {1, . . . , n} into
+mial regression, or index all possible subsets of covariates in        V equal-sized subsets I1 , . . . , IV , and for each m ∈ M and 1 ≤
+best subset selection. In the context of tuning parameter selec-       v ≤ V obtains     fm(v) using data points in I−v = Ivc . Then the
+tion, M can represent the number of steps taken in forward-            quality of m as a fitting procedure is approximated by averaging
+stepwise regression, where M is a pre-chosen large number              the predictive risk of the estimates:
+of steps beyond which the fitting will not have good inter-
+pretability. In Lasso, M usually indexes the set of λ values.                                             1  (v)
+                                                                                                                 V
+It is worth noting that in common software packages such                                     Qcv (m) =          Q(fm )
+                                                                                                          V v=1
+as glmnet, the set of λ values—more precisely, the largest
+λ value—does depend on the input dataset. However, such a
+                                                                       and the model that gives the best estimates is
+dependence can be removed by a simple and minor modifica-
+tion: after the standardization so that each column of the design
+                                                                                             m∗cv = arg min Qcv (m) .                       (2)
+matrix and the response variable has unit Euclidean norm, then                                           m∈M
+                                                                                 JOURNAL OF THE AMERICAN STATISTICAL ASSOCIATION        1981
+
+
+In practice, we do not have Qcv (m) and have to approximate it         the estimates    f0 has no uncertainty and we almost surely have
+using sample-split validated predictive risk of 
+                                                 (v)
+                                                fm and average         Q(f0 ) < Q( f1 ).
+over v = 1, . . . , V:                                                     In this example, there is no estimation error under the true
+                                                                       model, and the only source of error comes from the variability
+                        1   (v)
+                           V
+                                                                      of testing sample average ¯te . We cannot expect V-fold cross-
+              Qcv (m) =       (fm (Xi ), Yi ) ,
+                        n v=1                                          validation to fix this issue, since V-fold averaging only reduces√
+                                   i∈Iv
+                                                                       the uncertainty of testing sample average by a factor of V.
+and the best candidate is estimated by                                 Increasing the value of V cannot help either, because the vari-
+                                                                       ability of each single fold testing sample average increases with
+                     cv = arg min 
+                     m             Qcv (m) .                    (3)    V. In fact one can show that the probability of overfitting
+                                 m∈M
+                                                                       is bounded away from 0 for all values of V if V-fold cross-
+Five-fold cross-validation improves upon sample-split valida-          validation is used in Example 1.
+tion by averaging the approximate predictive risk of V different           In the context of model selection, one way to account for vali-
+estimates {
+              (v)
+            fm : 1 ≤ v ≤ V}, which provides a more                     dation uncertainty is to use a training-validation split ratio close
+comprehensive assessment by exploring the variability of   fm due     to zero. In the context of Example 1, the results in Shao (1993),
+to the randomness of fitting sample. This can be more clearly          Zhang (1993), and Yang (2007) suggest that m      ss is consistent if
+seen if we rewrite 
+                   Qcv as follows.                                     and only if ntr /n → 0. The intuition is that ¯te = OP (nte ),
+                                                                                                                                      −1/2
+                           ⎡                              ⎤                                                             −1/2
+                      V      n −1                                   much smaller than      μ , which has the order ntr .
+                    1
+        Qcv (m) =         ⎣          (fm(v) (Xi ), Yi )⎦                Although choosing a vanishing training ratio can theoreti-
+                    V v=1      V                                       cally address the problem of validation uncertainty for model
+                                          i∈Iv
+                                                                       selection, it is practically undesirable to fit the models with
+                     1  
+                        V
+                 ≈         Q(
+                             fm(v) ) ,                                 a much smaller sample size. Indeed, the required split ratio
+                     V v=1                                             cannot be achieved by any conventional V-fold cross-validation.
+                                                                       More importantly, using a vanishing training sample ratio
+where each term (n/V)−1              (v)                 (v)
+                              i∈Iv (fm (Xi ), Yi ) := Qss (fm ) is    may become problematic in the context of tuning parameter
+the sample-split validated predictive risk of
+                                              (v)                      selection and risk minimization. A common practice of cross-
+                                             fm , which is close to
+Q(fm ) by law of large numbers. While both 
+    (v)
+                                              Qss (
+                                                   fm ) and 
+                                                            Qcv (m)    validation in tuning parameter selection is to apply the fitting
+are unbiased estimates of the overall predictive risk if we use        procedure on the entire dataset with the chosen tuning parame-
+model (or tuning parameter index) m to estimate f , the latter         ter as a final output. In many important cases, such as bandwidth
+often has much smaller variance.                                       selection for nonparametric regression (Tsybakov 2009), and
+   The extreme case of V = n is known as the leave-one-out             choosing λ for the Lasso (Dalalyan, Hebiri, and Lederer 2017),
+cross-validation. In modern applications, it is often expensive        the optimal tuning parameter may depend on the sample size.
+and unnecessary to refit the model n times, so most statisti-          Therefore, if nte /n → 0, then the optimal λ for a training sample
+cal packages use 10-fold or V-fold cross-validation as default         of size nte is unlikely to be a good choice when applied to the
+choices.                                                               entire sample.
+
+
+2.3. Validation Uncertainty                                            3. Cross-Validation With Confidence
+
+We start our discussion from a simple example.                         Now we describe cross-validation with confidence, a procedure
+                                                                       that accounts for the validation uncertainty without sacrificing
+Example 1. Let Y = μ+ where  ∼ N(0, 1). The covariate X is           the training sample size. Our discussion starts from the simpler
+irrelevant here. Let M = {0, 1} where m = 0 corresponds to the         sample-split validation and then extends to the V-fold cross-
+model μ = 0 so      f0 ≡ 0, and m = 1 corresponds to the model        validation.
+μ ∈ R so    f1 (x) ≡ μtr with 
+                                μtr being the training sample mean
+of Y. We consider the squared error loss. Now assume μ = 0,
+                                                                       3.1. Sample-Split Validation With Hypothesis Testing
+then f0 is always a better estimate than f1 . But
+                                                                       Here, we consider sample-split validation and focus on the
+               Qss (
+                          Qss (
+                    f1 ) −            μ2tr − 2
+                                f0 ) =        μtr ¯te ,              conditional inference given the candidate estimates {   fm : m ∈
+                                                            √          M} obtained from training data Dtr . Recall that we evaluate a
+where ¯te is the testing data sample mean of . Because ntr    μtr
+     √
+and nte ¯te are independent standard normal random vari-                           f by Q(
+                                                                       fitted model       f ) = E((
+                                                                                                     f (X), Y) | Dtr ). For each m ∈ M,
+                                                                       define random vector ξm = (ξm,j : j = m) as
+                                          Qss (
+ables, there is positive probability that            Qss (
+                                               f1 ) −     f0 ) < 0.
+This probability becomes larger when nte is smaller.                                            fm (X), Y) − (
+                                                                                       ξm,j = (              fj (X), Y),               (4)
+   In Example 1, sample-splitting validation makes decision            where (X, Y) is a fresh independent sample from the same joint
+based on the sign of Qss (      Qss (
+                           f1 ) −     f0 ), which contains a true     distribution. Let μm,j = E(ξm,j | Dtr ). We consider a hypothesis
+            μtr and a noise part −2
+signal part 2                        μtr ¯te . Overfitting happens   testing problem
+if the noise overrides the signal. In this example, it is the                 H0,m : max μm,j ≤ 0 versus H1,m : max μm,j > 0 .           (5)
+uncertainty in the validation step that causes the error, since                       j=m                             j=m
+

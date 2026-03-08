@@ -1,0 +1,193 @@
+                                                                                    JOURNAL OF THE AMERICAN STATISTICAL ASSOCIATION      1985
+
+
+for all m = j with                                                         The idea of proof is that for the candidate models eliminated
+                                                                        in the screening stage are very unlikely to be competitive, with
+                  (An   ∨ 1)6 log7 (M ∨ n)
+                                           → 0,               (10)      total error controlled using Bonferroni correction. This result
+                            n1−c                                        is not new and known in, for example, Theorem 4.5 of Cher-
+for some c ∈ (0, 1). The following hold.                                nozhukov, Chetverikov, and Kato (2013b).
+               μm,j
+                         
+                                 1
+1. If maxj=m σm,j   ≤ rn n log(M∨n)    for some rn = o(1), then
+                                                                        4.1.2. Five-Fold CVC
+   P(m ∈ Ass ) ≥ 1 − α + o(1).                                          Exact Type I error control for the V-fold CVC is hard due
+2. If α ≥ n−1 , then there exists a universal constant C such that                                            (i)
+                                                                     to the dependence between the ξm,j        ’s (notation defined in (8),
+               μm,j                  log(M ∨ n)                         Section 3.2) among different folds. If we accept the intuition
+      P max         ≤ C(An ∨ 1)                  , ∀ m ∈ Ass
+          j=m σm,j                        n                             that such dependence among different folds is negligible as in
+                                                                        our motivation of the approximate p-value for V-fold CVC in
+         = 1 − o(1) .
+                                                                        Section 3.2, then part 1 of Theorem 1 can be extended to provide
+    We prove Theorem 1 in Section A.1. Part (1) of Theorem 1            a partial theoretical justification for the Type I error control of
+guarantees the inclusion of competitive estimates. If      fm is the   V-fold CVC.
+best estimate in {
+                  fm : m ∈ M}, then H0,m is true and m will                The exclusion probability for suboptimal candidates (part 2
+be included in Ass with probability at least 1 − α + o(1) by just       of Theorem 1) can be extended to V-fold CVC without ignoring
+taking rn = 0 in part (1). In fact, the proof reveals that in the       the dependence. Empirically, we find that V-fold CVC has much
+trivial case where μm,j = E(ξm,j | fm , 
+                                         fj ) = 0 for all j = m, we     better power in eliminating suboptimal estimates. To gain fur-
+have P(m ∈ Ass ) = 1 − α + o(1).                                        ther insights on why V-fold CVC is more powerful than sample-
+                                                                        splitting validation, suppose m ∈ M is a suboptimal candidate
+Remark 1. The sub-exponential tail condition (9) can be satis-          such that the inequality in (7) corresponding to H1,m holds for
+                                                                                                (v)        (v)
+fied, for example, for linear regression with squared loss if the       some j = m, and let  μm,j and (σm,j )2 be the empirical mean and
+covariate X and noise  are sub-Gaussian. The Orlicz ψ1 norm                          (i)
+                                                                        variance of {ξm,j                    (i)
+                                                                                          : i ∈ Iv }, where ξm,j is defined in (8). Then
+in (9) will depend on the estimated coefficients β  m , which are
+                                                                        μm,j = V −1 V                    2 = V −1
+                                                                                                    (v)                 V        (v)
+typically restricted in a bounded set with high probability on                         v=1 μm,j and σm,j                  σm,j )2 are the
+                                                                                                                        v=1 (
+Dtr . We provide an explicit example where (9) is satisfied with        overall sample mean and variance of the aggregated data matrix
+high probability on Dtr in Lemma 1.                                     used in V-fold CVC. By superiority of candidate j over candidate
+    Practically, one can qualitatively check the plausibility of (9)    m, we expect μ(v)
+                                                                                       m,j to be positive for most (if not all) folds. Thus,
+as follows. Given the fact that Zq ≤ q!Zψ1 for any random           
+                                                                        μm,j ≈ 
+                                                                                     (v)
+                                                                               μm,j > 0 for most fold index v. Moreover, if we further
+variable Z, one can estimate                                                                                        (v)
+                                                                                                      σm,j )2 are stable across folds,
+                                                                        assume that the variance terms (
+                             ξm,m − μm,m 
+                     (q!)−1 
+                            
+                                             
+                                                                       then 
+                                                                             σm,j is similar to the individual 
+                                                                                                                           (v)
+                                                                                                               σm,j ’s. Thus, the V-fold
+                                  σ m,m        q                                                   √  μm,j
+                                                                        CVC test statistic based on n σm,j amplifies the single-fold test
+for a few small integer values of q (e.g., q = 1, 2, 3, 4, . . .)
+using the realized ξm,m obtained from the validation sample                         √   
+                                                                                        μ
+                                                                                         (v)
+                                                                                                                       1/2 .
+                                                                        statistic    n/V m,j
+                                                                                          (v) by roughly a factor of V
+by plugging in μm,m and σm,m with empirical estimates. If                                  
+                                                                                           σm,j
+the estimates do not grow too fast when q grows, then the ψ1
+norm condition seems plausible. In our simulations, the CVC
+                                                                        4.2. Model Selection Consistency in Linear Models
+method works reasonably well in linear regression with noise
+distribution being Student’s t with three degrees of freedom.           Now we show that CVC can be used to overcome the overfitting
+                                                                        issue of standard cross-validation in a linear regression setting:
+Remark 2. There is a gap between inclusion and exclusion rates
+in Theorem 1. In the worst-case scenario the CVC confidence                                               Y = XT β +  ,                 (11)
+set may include all the candidates whose fitted models have
+standardized excess predictive risk falling in this gap range.          where X ∈ Rp has covariance , and  is an independent noise
+However, even in this scenario, Theorem 1 guarantees that               with mean zero and variance σ2 .
+(almost) all included candidate models have standardized excess            Given a collection of subsets J = {J1 , . . . , JM } ⊆ 2p , we
+risk bounded by the rate specified in part (2) of the theorem.          would like to find the m∗ such that
+
+Remark 3. When the inequality selection method is used for                                        Jm∗ = J ∗ := {j : βj = 0} ,
+an preliminary screening of the candidate set, the Type I error
+can be controlled as long as the screening threshold is chosen          assuming that the true model is included in the candidate set.
+appropriately. Indeed, we have the following corollary regarding        The standard cross-validation (using a single split) estimates
+the Type I error control using inequality selection.                    m by applying a least squares fit using the training data and
+                                                                        β
+                                                                        covariates in Jm , and evaluates the model by the residual sum
+Corollary 1. If the confidence set Ass is constructed using             of squares on the testing data. CVC works analogously with the
+inequality selection as in Section 3.3, then P(m∗ ∈ Ass ) ≥             same least squares fitting and uses the squared residual as loss
+1 − α − 3α + o(1) under the same conditions as in Theorem 1.            function. For any given α, CVC outputs an confidence set of
+1986       J. LEI
+
+
+candidate models. To select the correct model, we consider the        Theorem 2. Assume model (11) and assumptions B1, B2 hold.
+most parsimonious model in the confidence set                             ssc be given as in (12) with Ass being the sample split
+                                                                      Let m
+                                                                      validation confidence set using Type I error level αn → 0 and
+                          ssc = arg min |Jm | ,
+                          m                                   (12)    αn > n−1 . If
+                                        m∈Ass
+
+and                                                                                          λ̄14 λ−14 (d ∨ log n)
+                                                                                     lim sup            4
+                                                                                                                   ≤ C3              (16)
+                                                                                         n→∞        nβmin
+                          cvc = arg min |Jm | .
+                          m                                   (13)
+                                        m∈Acv
+                                                                      for some constant C3 , and
+According to Proposition 1, Acv (and also Ass ) is non-empty
+                                       cvc (and m
+with high probability when α < 0.5. So m         ssc ) is always                           λ̄12 λ−12 (log n)7
+                                                                                                               →0                    (17)
+well-defined when α < 0.5.                                                                         n1−a
+   We consider the following conditions.
+                                                                      for some a ∈ (0, 1) then there exists a constant C such that
+B1. The random vector X is centered and there exists λ̄ < ∞
+                                                          ∗
+    such that ψ2 ≤ λ̄1/2 and for each J ∈ J , b ∈ R|J∪J |            mssc = m∗ ) ≤ CM(1 + λ̄1/2 )λ̄4 λ−4 (d ∨ log n)n−1/2 + o(1) .
+                                                                      P(
+                           T       
+                          b XJ∪J ∗      ≤ λ̄1/2 b2 ,                 We prove Theorem 2 in Section A.2. The condition (16) is
+                                    ψ2
+                                                                      to ensure that the estimation error is dominated by the signal,
+    where XJ∪J ∗ is the sub-vector of X corresponding to index        measured by −μm∗ ,m /σm∗ ,m . The condition (17) is a translation
+    set J ∪ J ∗ .                                                    of (9) in view of (15). The final error probability bound implies
+B2. There exists a λ ∈ (0, σ2 ] such that λmin EXJ∪J ∗ XJ∪J
+                                                          T
+                                                             ∗ ≥      that, when the quantities λ̄, λ, d are all constants not changing
+                                                                      √ n, the number of candidate models M can be close to
+                                                                      with
+    λ for all J ∈ J , where λmin is the smallest eigenvalue.
+                                                                        n. To achieve such a rate of M, we need a delicate analysis
+Condition B1 enables us to establish uniform concentration of         of the overfitting case, together with the Kolmogorov–Rogozin
+empirical covariance matrices using the results in Koltchinskii       anti-concentration inequality (Rogozin 1961) since we do not
+and Lounici (2017). The centeredness assumption can be easily         assume Gaussianity of .
+removed by adding corresponding bounds on the expected
+value of X. Roughly speaking, λ̄ corresponds to the largest           Corollary 2. Under the same conditions in Theorem 2. Let m    cvc
+eigenvalue of EXJ∪J ∗ XJ∪J
+                        T . Condition B2 allows us to transform
+                           ∗
+                                                                      be given as in (13) using Type I error level αn → 0 and αn >
+the concentration of empirical covariance matrices to concen-         n−1 . Then
+tration of least squares estimates and the diagonal entries of hat                            
+matrices.                                                                           ∗           (1 + λ̄1/2 )λ̄4 λ−4 (d ∨ log n)  1
+                                                                       P(mcvc = m ) ≤ CM
+    The theoretical analysis will also depend on the dimension-                                                n1/2                zαn
+ality of candidate models as well as the signal size. To facilitate                                                 
+discussion, we introduce notation                                                                          zα2 n
+                                                                                          × exp −                         + o(1) ,
+                                                                                                    2V(1 + V/n)
+             d = max |J| , and βmin = min
+                                        ∗
+                                          |βj | > 0 .
+                    J∈J                         j∈J
+                                                                      where zα is the upper α quantile of the standard normal distri-
+   Our analysis will keep track of all the model parameters           bution.
+(n, d, M, λ̄, λ, βmin ). To simplify presentation, we assume β =
+1. There is no loss of generality since we can always rescale            The first term in the error bound has been discussed in
+(X, Y, ) to make β = 1.                                            the previous theorem, which corresponds to the probability on
+                                                                      each training data such that the resulting estimate β (v)∗ has the
+   First, we can show that, when n is large enough, the tail                                                                  m
+condition (9) holds with high probability.                            smallest predictive risk. The second term is to control the chance
+                                                                                            √ (v)        (v)
+                                                                      of the test statistic n          σm∗ ,m exceeding the threshold
+                                                                                                μm∗ ,m /
+                                                                                                                 −c
+                                                                                   approximation. If αn = n for some c ∈ (0, 1)
+Lemma 1. Under the conditions B1, B2, if                              using normal
+                                                                      then zαn ≈ 2c log n. So this part of error probability vanishes
+                               λ̄2 d ∨ log n
+                     lim sup                 ≤ C1             (14)    if M ≤ n−c for some c < c/V. Therefore, consistent model
+                                 2    n
+                           n→∞ λ                                      selection can be achieved if M grows as a polynomial of n.
+for some fixed constant C1 , then we have with probability 1 −
+o(1)                                                                  5. Numerical Experiments
+                                  
+           ξ                                                        We illustrate the performance of the CVC method using syn-
+            m,m − E(ξm,m | Dtr ) 
+                                  ≤ C2 λ̄2 λ−2 ,        (15)       thetic and real datasets. All cross-validation methods, including
+                var(ξm,m | Dtr ) ψ
+                                                1                     CVC, are implemented using five folds. CVC is implemented
+                                                                      using inequality screening with α ∈ {0.01, 0.05, 0.1, 0.2}, α =
+uniformly over all m, m for some constant C2 .                        0.005 and B = 200.
+
