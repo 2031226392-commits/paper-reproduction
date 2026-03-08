@@ -96,7 +96,7 @@
 ## 10. 扩展任务：NCV 分层嵌套选模（ncv1/ncv2/ncv3）
 
 - 已新增专项文档：`docs/ncv_sim1_extension_plan.md`。
-- 按 3 折外层 + 2 折内层执行 nested cross-validation：
+- 按 5 折外层 + 4 折内层执行 nested cross-validation：
   - 外层每轮 1 折 holdout；
   - 内层仅在其余 2 折上做 CV 选模；
   - 外层 holdout 全程不参与内层选模。
