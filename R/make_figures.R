@@ -59,7 +59,7 @@ plot_sim1_selection <- function(cvc_summary, other_summary, out_path, alpha = 0.
       x <- sort(unique(sub_other$n))
 
       plot(NA, xlim = range(x), ylim = c(0, 1), xlab = "n", ylab = "Correct Selection Rate",
-           main = paste0(model_name, ", sigma2=", sigma2, ", alpha=", alpha))
+           main = paste0(model_name, ", sigma2=", sigma2, ", α=", alpha))
       grid()
 
       cvc_pmax <- sub_cvc[sub_cvc$method == "cvc_pmax", ]
@@ -111,7 +111,7 @@ plot_sim1_nonrejected <- function(raw_df, out_path, alpha = 0.05) {
 
       plot(NA, xlim = range(x), ylim = c(0, max(1, y_max * 1.1)),
            xlab = "n", ylab = "Mean # Non-Rejected Models",
-           main = paste0(model_name, ", sigma2=", sigma2, ", alpha=", alpha))
+           main = paste0(model_name, ", sigma2=", sigma2, ", α=", alpha))
       grid()
 
       cvc <- cur[cur$method == "cvc_pmax", ]
@@ -123,7 +123,7 @@ plot_sim1_nonrejected <- function(raw_df, out_path, alpha = 0.05) {
       lines(fy$n, fy$acv_size, type = "b", pch = 17, col = "#D62728", lwd = 2, lty = 2)
 
       legend("topright",
-             legend = c("cvc", "fy"),
+             legend = c("cvc (A_cv)", "fy (A_fy)"),
              col = c("#1F77B4", "#D62728"),
              lty = c(1, 2),
              pch = c(16, 17),
