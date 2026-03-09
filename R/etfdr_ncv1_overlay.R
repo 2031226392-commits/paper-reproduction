@@ -384,7 +384,6 @@ plot_overlay <- function(curve_df, sel_all, out_path) {
   mse_cols <- c(cv = "#1F77B4", cvc = "#FF7F0E", ncv0 = "#7F7F7F", ncv1 = "#2CA02C")
   fdr_cols <- c(cv = "#1F77B4", cvc = "#FF7F0E", ncv0 = "#7F7F7F", ncv1 = "#2CA02C")
   methods <- c("cv", "cvc", "ncv0", "ncv1")
-  draw_order <- c("cvc", "ncv0", "ncv1", "cv")
 
   for (scenario in c("independent", "correlated")) {
     cur <- curve_df[curve_df$scenario == scenario, ]
@@ -398,14 +397,10 @@ plot_overlay <- function(curve_df, sel_all, out_path) {
          log = "x",
          ylim = c(0, y_mse_max * 1.05),
          main = ifelse(scenario == "independent", "Independent", "Correlated (AR(0.8))"))
-    for (m in draw_order) {
+    for (m in methods) {
       tmp <- cur[cur$method == m, ]
       tmp <- tmp[order(tmp$lambda, decreasing = TRUE), ]
       lines(tmp$lambda, tmp$mse_mean, lwd = 2.5, col = mse_cols[m], lty = 1)
-      if (m == "cv") {
-        idx_mark <- unique(round(seq(1, nrow(tmp), length.out = min(20, nrow(tmp)))))
-        points(tmp$lambda[idx_mark], tmp$mse_mean[idx_mark], pch = 16, cex = 0.45, col = mse_cols[m])
-      }
     }
 
     par(new = TRUE)
@@ -414,16 +409,12 @@ plot_overlay <- function(curve_df, sel_all, out_path) {
          axes = FALSE, xlab = "", ylab = "",
          log = "x",
          ylim = c(0, 1))
-    for (m in draw_order) {
+    for (m in methods) {
       tmp <- cur[cur$method == m, ]
       tmp <- tmp[order(tmp$lambda, decreasing = TRUE), ]
       lines(tmp$lambda, tmp$true_fdr_mean, lwd = 1.6, col = fdr_cols[m], lty = 2)
       lines(tmp$lambda, tmp$est_fdr_mean, lwd = 1.6, col = fdr_cols[m], lty = 3)
       lines(tmp$lambda, tmp$fdp_mean, lwd = 1.6, col = fdr_cols[m], lty = 4)
-      if (m == "cv") {
-        idx_mark <- unique(round(seq(1, nrow(tmp), length.out = min(20, nrow(tmp)))))
-        points(tmp$lambda[idx_mark], tmp$fdp_mean[idx_mark], pch = 16, cex = 0.4, col = fdr_cols[m])
-      }
     }
     axis(4)
     mtext("FDR / FDP", side = 4, line = 2)
