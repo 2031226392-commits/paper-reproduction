@@ -349,14 +349,7 @@ plot_overlay <- function(curve_df, sel_all, out_path) {
     for (m in methods) {
       tmp <- cur[cur$method == m, ]
       tmp <- tmp[order(tmp$lambda, decreasing = TRUE), ]
-      lines(tmp$lambda, tmp$mse_mean, lwd = 2, col = mse_cols[m], lty = 1)
-    }
-
-    sub <- sel_all[sel_all$scenario == scenario, ]
-    mean_by_method <- aggregate(lambda ~ method, data = sub, FUN = mean)
-    xline <- function(method, col, lty, lwd = 2) {
-      val <- mean_by_method$lambda[mean_by_method$method == method]
-      if (length(val) == 1L) abline(v = val, col = col, lty = lty, lwd = lwd)
+      lines(tmp$lambda, tmp$mse_mean, lwd = 2.5, col = mse_cols[m], lty = 1)
     }
 
     par(new = TRUE)
@@ -368,35 +361,21 @@ plot_overlay <- function(curve_df, sel_all, out_path) {
     for (m in methods) {
       tmp <- cur[cur$method == m, ]
       tmp <- tmp[order(tmp$lambda, decreasing = TRUE), ]
-      lines(tmp$lambda, tmp$true_fdr_mean, lwd = 1.6, col = fdr_cols[m], lty = 1)
-      lines(tmp$lambda, tmp$est_fdr_mean, lwd = 1.6, col = fdr_cols[m], lty = 2)
-      lines(tmp$lambda, tmp$fdp_mean, lwd = 1.6, col = fdr_cols[m], lty = 3)
+      lines(tmp$lambda, tmp$true_fdr_mean, lwd = 1.6, col = fdr_cols[m], lty = 2)
+      lines(tmp$lambda, tmp$est_fdr_mean, lwd = 1.6, col = fdr_cols[m], lty = 3)
+      lines(tmp$lambda, tmp$fdp_mean, lwd = 1.6, col = fdr_cols[m], lty = 4)
     }
     axis(4)
     mtext("FDR / FDP", side = 4, line = 2)
 
-    xline("cv_min", "#1F77B4", 1)
-    xline("cvc_max_lambda", "#FF7F0E", 1)
-    xline("ncv0_min", "#7F7F7F", 1)
-    xline("ncv1_min", "#2CA02C", 1)
-    xline("cv_1se", "#1F77B4", 2)
-    xline("ncv0_1se", "#7F7F7F", 2)
-    xline("ncv1_1se", "#2CA02C", 2)
-
     legend("topleft",
-           legend = c("MSE: cv/cvc/ncv0/ncv1 (color)",
-                      "FDR_true (solid)", "FDR_hat (dashed)", "FDP (dotted)",
-                      "cv", "cvc", "ncv0", "ncv1",
-                      "cv_1se", "ncv0_1se", "ncv1_1se"),
-           col = c("#111111",
-                   "#111111", "#111111", "#111111",
-                   "#1F77B4", "#FF7F0E", "#7F7F7F", "#2CA02C",
-                   "#1F77B4", "#7F7F7F", "#2CA02C"),
-           lty = c(NA, 1, 2, 3, 1, 1, 1, 1, 2, 2, 2),
-           lwd = c(NA, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2),
-           pch = c(NA, NA, NA, NA, 15, 15, 15, 15, NA, NA, NA),
-           pt.cex = c(NA, NA, NA, NA, 0.9, 0.9, 0.9, 0.9, NA, NA, NA),
-           cex = 0.78, bg = "white")
+           legend = c("cv", "cvc", "ncv0", "ncv1",
+                      "MSE (solid)", "FDR_true", "FDR_hat", "FDP"),
+           col = c("#1F77B4", "#FF7F0E", "#7F7F7F", "#2CA02C",
+                   "#111111", "#111111", "#111111", "#111111"),
+           lty = c(1, 1, 1, 1, 1, 2, 3, 4),
+           lwd = c(2.5, 2.5, 2.5, 2.5, 2.5, 1.8, 1.8, 1.8),
+           cex = 0.8, bg = "white")
   }
 
   dev.off()

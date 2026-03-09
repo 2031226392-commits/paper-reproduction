@@ -98,6 +98,9 @@
   并在右轴展示 `FDR_true(λ)`、`FDR_hat(λ)`、`FDP(λ)` 曲线；可直接基于已有
   `results/etfdr_fig1*_curves.csv` 与 `results/etfdr_fig1*_ncv1_overlay_all_selected.csv`
   重绘，无需重跑仿真。
+- 图形规范补充：ETFDR 扩展图采用“函数曲线”表达（随 `λ` 连续变化），
+  左轴为 `MSE`、右轴为 `FDR/FDP`，方法颜色固定为
+  `cv(蓝) / cvc(橙) / ncv0(灰) / ncv1(绿)`，避免仅用竖线选点表达。
 
 ## 10. 扩展任务：NCV 分层嵌套选模（ncv0/ncv1/ncv2/ncv3）
 
