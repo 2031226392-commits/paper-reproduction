@@ -273,6 +273,7 @@ run_ncv1_overlay <- function(cfg) {
       mse_mean = base$cv_mse_mean,
       true_fdr_mean = base$true_fdr_mean,
       est_fdr_mean = base$est_fdr_mean,
+      fdp_mean = base$true_fdr_mean,
       stringsAsFactors = FALSE
     )
     cid <- cid + 1L
@@ -282,6 +283,7 @@ run_ncv1_overlay <- function(cfg) {
       mse_mean = base$cv_mse_mean,
       true_fdr_mean = base$true_fdr_mean,
       est_fdr_mean = base$est_fdr_mean,
+      fdp_mean = base$true_fdr_mean,
       stringsAsFactors = FALSE
     )
     cid <- cid + 1L
@@ -291,6 +293,7 @@ run_ncv1_overlay <- function(cfg) {
       mse_mean = ncv_mse,
       true_fdr_mean = ncv_true,
       est_fdr_mean = ncv_est,
+      fdp_mean = ncv_true,
       stringsAsFactors = FALSE
     )
     cid <- cid + 1L
@@ -300,6 +303,7 @@ run_ncv1_overlay <- function(cfg) {
       mse_mean = ncv_mse,
       true_fdr_mean = ncv_true,
       est_fdr_mean = ncv_est,
+      fdp_mean = ncv_true,
       stringsAsFactors = FALSE
     )
     cid <- cid + 1L
@@ -319,8 +323,8 @@ run_ncv1_overlay <- function(cfg) {
 }
 
 plot_overlay <- function(curve_df, sel_all, out_path) {
-  png(out_path, width = 1700, height = 900, res = 120)
-  par(mfrow = c(2, 2), mar = c(4, 4, 3, 4))
+  png(out_path, width = 1700, height = 760, res = 120)
+  par(mfrow = c(1, 2), mar = c(4, 4, 3, 4))
 
   if (!("fdp_mean" %in% names(curve_df))) {
     curve_df$fdp_mean <- curve_df$true_fdr_mean
@@ -333,63 +337,43 @@ plot_overlay <- function(curve_df, sel_all, out_path) {
   for (scenario in c("independent", "correlated")) {
     cur <- curve_df[curve_df$scenario == scenario, ]
     cur <- cur[order(cur$lambda, decreasing = TRUE), ]
-    x <- sort(unique(-log(cur$lambda)))
+    x <- sort(unique(cur$lambda), decreasing = TRUE)
 
-    cur_mse <- cur[cur$method == "cv", ]
-    cur_mse <- cur_mse[order(cur_mse$lambda, decreasing = TRUE), ]
-    plot(-log(cur_mse$lambda), cur_mse$mse_mean, type = "l", lwd = 2, col = mse_cols["cv"],
-         xlab = "-log(lambda)", ylab = "CV MSE",
-         main = ifelse(scenario == "independent", "Independent: MSE", "Correlated: MSE"))
-    for (m in methods[-1]) {
+    y_mse_max <- max(cur$mse_mean, na.rm = TRUE)
+    plot(x, rep(NA_real_, length(x)),
+         type = "n",
+         xlab = "lambda", ylab = "MSE",
+         log = "x",
+         ylim = c(0, y_mse_max * 1.05),
+         main = ifelse(scenario == "independent", "Independent", "Correlated (AR(0.8))"))
+    for (m in methods) {
       tmp <- cur[cur$method == m, ]
       tmp <- tmp[order(tmp$lambda, decreasing = TRUE), ]
-      lines(-log(tmp$lambda), tmp$mse_mean, lwd = 2, col = mse_cols[m])
+      lines(tmp$lambda, tmp$mse_mean, lwd = 2, col = mse_cols[m], lty = 1)
     }
 
     sub <- sel_all[sel_all$scenario == scenario, ]
     mean_by_method <- aggregate(lambda ~ method, data = sub, FUN = mean)
     xline <- function(method, col, lty, lwd = 2) {
       val <- mean_by_method$lambda[mean_by_method$method == method]
-      if (length(val) == 1L) abline(v = -log(val), col = col, lty = lty, lwd = lwd)
+      if (length(val) == 1L) abline(v = val, col = col, lty = lty, lwd = lwd)
     }
 
-    legend("topleft",
-           legend = c("cv", "cvc", "ncv0", "ncv1", "cv_1se", "ncv0_1se", "ncv1_1se"),
-           col = c("#1F77B4", "#FF7F0E", "#7F7F7F", "#2CA02C", "#1F77B4", "#7F7F7F", "#2CA02C"),
-           lty = c(1, 1, 1, 1, 2, 2, 2),
-           lwd = c(2, 2, 2, 2, 2, 2, 2),
-           cex = 0.82, bg = "white")
-
-    xline("cv_min", "#1F77B4", 1)
-    xline("cvc_max_lambda", "#FF7F0E", 1)
-    xline("ncv0_min", "#7F7F7F", 1)
-    xline("ncv1_min", "#2CA02C", 1)
-    xline("cv_1se", "#1F77B4", 2)
-    xline("ncv0_1se", "#7F7F7F", 2)
-    xline("ncv1_1se", "#2CA02C", 2)
-
-    cur_fdr <- cur[cur$method == "cvc", ]
-    cur_fdr <- cur_fdr[order(cur_fdr$lambda, decreasing = TRUE), ]
-    plot(-log(cur_fdr$lambda), cur_fdr$true_fdr_mean, type = "l", lwd = 2, col = fdr_cols["cvc"],
-         xlab = "-log(lambda)", ylab = "FDR",
-         ylim = c(0, 1),
-         main = ifelse(scenario == "independent", "Independent: FDR", "Correlated: FDR"))
-    lines(-log(cur_fdr$lambda), cur_fdr$est_fdr_mean, lwd = 2, col = fdr_cols["cvc"], lty = 2)
-    lines(-log(cur_fdr$lambda), cur_fdr$fdp_mean, lwd = 2, col = fdr_cols["cvc"], lty = 3)
-    for (m in methods[-2]) {
+    par(new = TRUE)
+    plot(x, rep(NA_real_, length(x)),
+         type = "n",
+         axes = FALSE, xlab = "", ylab = "",
+         log = "x",
+         ylim = c(0, 1))
+    for (m in methods) {
       tmp <- cur[cur$method == m, ]
       tmp <- tmp[order(tmp$lambda, decreasing = TRUE), ]
-      lines(-log(tmp$lambda), tmp$true_fdr_mean, lwd = 2, col = fdr_cols[m])
-      lines(-log(tmp$lambda), tmp$est_fdr_mean, lwd = 2, col = fdr_cols[m], lty = 2)
-      lines(-log(tmp$lambda), tmp$fdp_mean, lwd = 2, col = fdr_cols[m], lty = 3)
+      lines(tmp$lambda, tmp$true_fdr_mean, lwd = 1.6, col = fdr_cols[m], lty = 1)
+      lines(tmp$lambda, tmp$est_fdr_mean, lwd = 1.6, col = fdr_cols[m], lty = 2)
+      lines(tmp$lambda, tmp$fdp_mean, lwd = 1.6, col = fdr_cols[m], lty = 3)
     }
-
-    legend("topleft",
-           legend = c("FDR_true (solid)", "FDR_hat (dashed)", "FDP (dotted)", "cvc", "ncv0", "ncv1", "cv"),
-           col = c("#111111", "#111111", "#111111", "#FF7F0E", "#7F7F7F", "#2CA02C", "#1F77B4"),
-           lty = c(1, 2, 3, 1, 1, 1, 1),
-           lwd = c(2, 2, 2, 2, 2, 2, 2),
-           cex = 0.82, bg = "white")
+    axis(4)
+    mtext("FDR / FDP", side = 4, line = 2)
 
     xline("cv_min", "#1F77B4", 1)
     xline("cvc_max_lambda", "#FF7F0E", 1)
@@ -398,6 +382,21 @@ plot_overlay <- function(curve_df, sel_all, out_path) {
     xline("cv_1se", "#1F77B4", 2)
     xline("ncv0_1se", "#7F7F7F", 2)
     xline("ncv1_1se", "#2CA02C", 2)
+
+    legend("topleft",
+           legend = c("MSE: cv/cvc/ncv0/ncv1 (color)",
+                      "FDR_true (solid)", "FDR_hat (dashed)", "FDP (dotted)",
+                      "cv", "cvc", "ncv0", "ncv1",
+                      "cv_1se", "ncv0_1se", "ncv1_1se"),
+           col = c("#111111",
+                   "#111111", "#111111", "#111111",
+                   "#1F77B4", "#FF7F0E", "#7F7F7F", "#2CA02C",
+                   "#1F77B4", "#7F7F7F", "#2CA02C"),
+           lty = c(NA, 1, 2, 3, 1, 1, 1, 1, 2, 2, 2),
+           lwd = c(NA, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2),
+           pch = c(NA, NA, NA, NA, 15, 15, 15, 15, NA, NA, NA),
+           pt.cex = c(NA, NA, NA, NA, 0.9, 0.9, 0.9, 0.9, NA, NA, NA),
+           cex = 0.78, bg = "white")
   }
 
   dev.off()
