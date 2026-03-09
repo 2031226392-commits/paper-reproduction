@@ -93,6 +93,77 @@ select_ncv01 <- function(X, y, lambda_grid, outer_folds = 5L, inner_folds = 4L, 
   )
 }
 
+compute_ncv_curve <- function(X, y, lambda_grid, d1, fdr_c,
+                              outer_folds = 5L, seed = NULL) {
+  n <- nrow(X)
+  M <- length(lambda_grid)
+  if (!is.null(seed)) set.seed(as.integer(seed))
+  outer_id <- sample(rep(seq_len(outer_folds), length.out = n))
+
+  mse_fold <- matrix(NA_real_, nrow = outer_folds, ncol = M)
+  true_fdr_fold <- matrix(NA_real_, nrow = outer_folds, ncol = M)
+  est_fdr_fold <- matrix(NA_real_, nrow = outer_folds, ncol = M)
+
+  for (o in seq_len(outer_folds)) {
+    te <- which(outer_id == o)
+    tr <- which(outer_id != o)
+    X_tr <- X[tr, , drop = FALSE]
+    y_tr <- y[tr]
+    X_te <- X[te, , drop = FALSE]
+    y_te <- y[te]
+
+    fit_tr <- glmnet::glmnet(X_tr, y_tr, lambda = lambda_grid,
+                             standardize = FALSE, intercept = TRUE)
+    pred <- as.matrix(stats::predict(fit_tr, newx = X_te, s = lambda_grid))
+    mse_fold[o, ] <- colMeans((matrix(y_te, nrow = length(te), ncol = M) - pred) ^ 2)
+
+    coef_mat <- as.matrix(stats::coef(fit_tr, s = lambda_grid))
+    pvals_tr <- compute_ols_pvalues(X_tr, y_tr)
+
+    for (k in seq_len(M)) {
+      sel <- which(abs(coef_mat[-1, k]) > 0)
+      Rk <- length(sel)
+      if (Rk == 0L) {
+        true_fdr_fold[o, k] <- 0
+        est_fdr_fold[o, k] <- 0
+      } else {
+        true_fdr_fold[o, k] <- sum(sel > d1) / Rk
+        est_fdr_fold[o, k] <- min(1, sum(pvals_tr[sel] > fdr_c) / ((1 - fdr_c) * Rk))
+      }
+    }
+  }
+
+  list(
+    mse = colMeans(mse_fold),
+    true_fdr = colMeans(true_fdr_fold),
+    est_fdr = colMeans(est_fdr_fold)
+  )
+}
+
+build_overlay_curves_from_base <- function(base_curve_df,
+                                           methods = c("cv", "cvc", "ncv0", "ncv1")) {
+  rows <- list()
+  rid <- 1L
+  for (scenario in c("independent", "correlated")) {
+    base <- base_curve_df[base_curve_df$scenario == scenario, ]
+    base <- base[order(base$lambda, decreasing = TRUE), ]
+    for (m in methods) {
+      rows[[rid]] <- data.frame(
+        scenario = scenario,
+        method = m,
+        lambda = base$lambda,
+        mse_mean = base$cv_mse_mean,
+        true_fdr_mean = base$true_fdr_mean,
+        est_fdr_mean = base$est_fdr_mean,
+        fdp_mean = base$true_fdr_mean,
+        stringsAsFactors = FALSE
+      )
+      rid <- rid + 1L
+    }
+  }
+  do.call(rbind, rows)
+}
+
 run_ncv1_overlay <- function(cfg) {
   safe_dir_create("results")
   safe_dir_create("figures")
@@ -108,10 +179,24 @@ run_ncv1_overlay <- function(cfg) {
   sel_base <- read.csv(base_sel_path)
 
   lambda_grid <- sort(unique(curve_df$lambda), decreasing = TRUE)
+  M <- length(lambda_grid)
+  scen <- c("independent", "correlated")
+  ncv_curve_store <- list(
+    independent = list(
+      mse = matrix(NA_real_, nrow = cfg$reps_ncv, ncol = M),
+      true_fdr = matrix(NA_real_, nrow = cfg$reps_ncv, ncol = M),
+      est_fdr = matrix(NA_real_, nrow = cfg$reps_ncv, ncol = M)
+    ),
+    correlated = list(
+      mse = matrix(NA_real_, nrow = cfg$reps_ncv, ncol = M),
+      true_fdr = matrix(NA_real_, nrow = cfg$reps_ncv, ncol = M),
+      est_fdr = matrix(NA_real_, nrow = cfg$reps_ncv, ncol = M)
+    )
+  )
 
   rows <- list()
   rid <- 1L
-  for (scenario in c("independent", "correlated")) {
+  for (scenario in scen) {
     for (r in seq_len(cfg$reps_ncv)) {
       set.seed(cfg$seed + r + ifelse(scenario == "correlated", 100000L, 0L))
       dat <- generate_fig1_data(cfg, scenario)
@@ -120,6 +205,14 @@ run_ncv1_overlay <- function(cfg) {
                           outer_folds = cfg$outer_folds,
                           inner_folds = cfg$inner_folds,
                           seed = cfg$seed + 200000L + r + ifelse(scenario == "correlated", 100000L, 0L))
+      ncv_curve <- compute_ncv_curve(dat$X, dat$y, lambda_grid,
+                                     d1 = cfg$d1,
+                                     fdr_c = cfg$fdr_c,
+                                     outer_folds = cfg$outer_folds,
+                                     seed = cfg$seed + 300000L + r + ifelse(scenario == "correlated", 100000L, 0L))
+      ncv_curve_store[[scenario]]$mse[r, ] <- ncv_curve$mse
+      ncv_curve_store[[scenario]]$true_fdr[r, ] <- ncv_curve$true_fdr
+      ncv_curve_store[[scenario]]$est_fdr[r, ] <- ncv_curve$est_fdr
 
       rows[[rid]] <- data.frame(scenario = scenario, rep = r,
                                 method = "ncv0_min",
@@ -166,33 +259,92 @@ run_ncv1_overlay <- function(cfg) {
   out_all <- file.path("results", paste0(cfg$save_prefix, "_all_selected.csv"))
   write.csv(sel_all, out_all, row.names = FALSE)
 
-  plot_overlay(curve_df, sel_all,
+  curve_rows <- list()
+  cid <- 1L
+  for (scenario in scen) {
+    base <- curve_df[curve_df$scenario == scenario, ]
+    base <- base[order(base$lambda, decreasing = TRUE), ]
+    ncv_mse <- colMeans(ncv_curve_store[[scenario]]$mse)
+    ncv_true <- colMeans(ncv_curve_store[[scenario]]$true_fdr)
+    ncv_est <- colMeans(ncv_curve_store[[scenario]]$est_fdr)
+
+    curve_rows[[cid]] <- data.frame(
+      scenario = scenario, method = "cv", lambda = base$lambda,
+      mse_mean = base$cv_mse_mean,
+      true_fdr_mean = base$true_fdr_mean,
+      est_fdr_mean = base$est_fdr_mean,
+      stringsAsFactors = FALSE
+    )
+    cid <- cid + 1L
+
+    curve_rows[[cid]] <- data.frame(
+      scenario = scenario, method = "cvc", lambda = base$lambda,
+      mse_mean = base$cv_mse_mean,
+      true_fdr_mean = base$true_fdr_mean,
+      est_fdr_mean = base$est_fdr_mean,
+      stringsAsFactors = FALSE
+    )
+    cid <- cid + 1L
+
+    curve_rows[[cid]] <- data.frame(
+      scenario = scenario, method = "ncv0", lambda = base$lambda,
+      mse_mean = ncv_mse,
+      true_fdr_mean = ncv_true,
+      est_fdr_mean = ncv_est,
+      stringsAsFactors = FALSE
+    )
+    cid <- cid + 1L
+
+    curve_rows[[cid]] <- data.frame(
+      scenario = scenario, method = "ncv1", lambda = base$lambda,
+      mse_mean = ncv_mse,
+      true_fdr_mean = ncv_true,
+      est_fdr_mean = ncv_est,
+      stringsAsFactors = FALSE
+    )
+    cid <- cid + 1L
+  }
+
+  curve_overlay <- do.call(rbind, curve_rows)
+  out_curve <- file.path("results", paste0(cfg$save_prefix, "_curve_overlay.csv"))
+  write.csv(curve_overlay, out_curve, row.names = FALSE)
+
+  plot_overlay(curve_overlay, sel_all,
                out_path = file.path("figures", paste0(cfg$save_prefix, "_figure.png")))
 
   list(sel_ncv = out_sel,
        sel_all = out_all,
+       curve_overlay = out_curve,
        fig = file.path("figures", paste0(cfg$save_prefix, "_figure.png")))
 }
 
 plot_overlay <- function(curve_df, sel_all, out_path) {
-  png(out_path, width = 1600, height = 760, res = 120)
-  par(mfrow = c(1, 2), mar = c(4, 4, 3, 4))
+  png(out_path, width = 1700, height = 900, res = 120)
+  par(mfrow = c(2, 2), mar = c(4, 4, 3, 4))
+
+  if (!("fdp_mean" %in% names(curve_df))) {
+    curve_df$fdp_mean <- curve_df$true_fdr_mean
+  }
+
+  mse_cols <- c(cv = "#1F77B4", cvc = "#FF7F0E", ncv0 = "#7F7F7F", ncv1 = "#2CA02C")
+  fdr_cols <- c(cv = "#1F77B4", cvc = "#FF7F0E", ncv0 = "#7F7F7F", ncv1 = "#2CA02C")
+  methods <- c("cv", "cvc", "ncv0", "ncv1")
 
   for (scenario in c("independent", "correlated")) {
     cur <- curve_df[curve_df$scenario == scenario, ]
     cur <- cur[order(cur$lambda, decreasing = TRUE), ]
-    x <- -log(cur$lambda)
+    x <- sort(unique(-log(cur$lambda)))
 
-    plot(x, cur$cv_mse_mean, type = "l", lwd = 2, col = "#1F77B4",
+    cur_mse <- cur[cur$method == "cv", ]
+    cur_mse <- cur_mse[order(cur_mse$lambda, decreasing = TRUE), ]
+    plot(-log(cur_mse$lambda), cur_mse$mse_mean, type = "l", lwd = 2, col = mse_cols["cv"],
          xlab = "-log(lambda)", ylab = "CV MSE",
-         main = ifelse(scenario == "independent", "Independent", "Correlated (AR(0.8))"))
-
-    par(new = TRUE)
-    plot(x, cur$true_fdr_mean, type = "l", lwd = 2, col = "#111111",
-         axes = FALSE, xlab = "", ylab = "", ylim = c(0, 1))
-    lines(x, cur$est_fdr_mean, lwd = 2, col = "#D62728")
-    axis(4)
-    mtext("FDR", side = 4, line = 2)
+         main = ifelse(scenario == "independent", "Independent: MSE", "Correlated: MSE"))
+    for (m in methods[-1]) {
+      tmp <- cur[cur$method == m, ]
+      tmp <- tmp[order(tmp$lambda, decreasing = TRUE), ]
+      lines(-log(tmp$lambda), tmp$mse_mean, lwd = 2, col = mse_cols[m])
+    }
 
     sub <- sel_all[sel_all$scenario == scenario, ]
     mean_by_method <- aggregate(lambda ~ method, data = sub, FUN = mean)
@@ -200,6 +352,13 @@ plot_overlay <- function(curve_df, sel_all, out_path) {
       val <- mean_by_method$lambda[mean_by_method$method == method]
       if (length(val) == 1L) abline(v = -log(val), col = col, lty = lty, lwd = lwd)
     }
+
+    legend("topleft",
+           legend = c("cv", "cvc", "ncv0", "ncv1", "cv_1se", "ncv0_1se", "ncv1_1se"),
+           col = c("#1F77B4", "#FF7F0E", "#7F7F7F", "#2CA02C", "#1F77B4", "#7F7F7F", "#2CA02C"),
+           lty = c(1, 1, 1, 1, 2, 2, 2),
+           lwd = c(2, 2, 2, 2, 2, 2, 2),
+           cex = 0.82, bg = "white")
 
     xline("cv_min", "#1F77B4", 1)
     xline("cvc_max_lambda", "#FF7F0E", 1)
@@ -209,14 +368,36 @@ plot_overlay <- function(curve_df, sel_all, out_path) {
     xline("ncv0_1se", "#7F7F7F", 2)
     xline("ncv1_1se", "#2CA02C", 2)
 
+    cur_fdr <- cur[cur$method == "cvc", ]
+    cur_fdr <- cur_fdr[order(cur_fdr$lambda, decreasing = TRUE), ]
+    plot(-log(cur_fdr$lambda), cur_fdr$true_fdr_mean, type = "l", lwd = 2, col = fdr_cols["cvc"],
+         xlab = "-log(lambda)", ylab = "FDR",
+         ylim = c(0, 1),
+         main = ifelse(scenario == "independent", "Independent: FDR", "Correlated: FDR"))
+    lines(-log(cur_fdr$lambda), cur_fdr$est_fdr_mean, lwd = 2, col = fdr_cols["cvc"], lty = 2)
+    lines(-log(cur_fdr$lambda), cur_fdr$fdp_mean, lwd = 2, col = fdr_cols["cvc"], lty = 3)
+    for (m in methods[-2]) {
+      tmp <- cur[cur$method == m, ]
+      tmp <- tmp[order(tmp$lambda, decreasing = TRUE), ]
+      lines(-log(tmp$lambda), tmp$true_fdr_mean, lwd = 2, col = fdr_cols[m])
+      lines(-log(tmp$lambda), tmp$est_fdr_mean, lwd = 2, col = fdr_cols[m], lty = 2)
+      lines(-log(tmp$lambda), tmp$fdp_mean, lwd = 2, col = fdr_cols[m], lty = 3)
+    }
+
     legend("topleft",
-           legend = c("CV MSE", "True FDR", "FDR Est.",
-                      "cv", "cvc", "ncv0", "ncv1", "cv_1se", "ncv0_1se", "ncv1_1se"),
-           col = c("#1F77B4", "#111111", "#D62728",
-                   "#1F77B4", "#FF7F0E", "#7F7F7F", "#2CA02C", "#1F77B4", "#7F7F7F", "#2CA02C"),
-           lty = c(1, 1, 1, 1, 1, 1, 1, 2, 2, 2),
-           lwd = c(2, 2, 2, 2, 2, 2, 2, 2, 2, 2),
+           legend = c("FDR_true (solid)", "FDR_hat (dashed)", "FDP (dotted)", "cvc", "ncv0", "ncv1", "cv"),
+           col = c("#111111", "#111111", "#111111", "#FF7F0E", "#7F7F7F", "#2CA02C", "#1F77B4"),
+           lty = c(1, 2, 3, 1, 1, 1, 1),
+           lwd = c(2, 2, 2, 2, 2, 2, 2),
            cex = 0.82, bg = "white")
+
+    xline("cv_min", "#1F77B4", 1)
+    xline("cvc_max_lambda", "#FF7F0E", 1)
+    xline("ncv0_min", "#7F7F7F", 1)
+    xline("ncv1_min", "#2CA02C", 1)
+    xline("cv_1se", "#1F77B4", 2)
+    xline("ncv0_1se", "#7F7F7F", 2)
+    xline("ncv1_1se", "#2CA02C", 2)
   }
 
   dev.off()

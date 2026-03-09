@@ -94,6 +94,10 @@
 - 执行优先级：保持在 Simulation 1 主复现之后，作为并行扩展线。
 - 后续新增：在 ETFDR Figure 1 设定下接入 `ncv0/ncv1`（外层5折、内层4折），
   与 `cv/cvc` 及 `cv_1se/ncv0_1se/ncv1_1se` 竖线同图对照（复用已跑 `cv/cvc` 结果）。
+- 当前图形扩展：在同一骨架下补充 `cvc/ncv0/ncv1` 的 `MSE(λ)` 曲线，
+  并在右轴展示 `FDR_true(λ)`、`FDR_hat(λ)`、`FDP(λ)` 曲线；可直接基于已有
+  `results/etfdr_fig1*_curves.csv` 与 `results/etfdr_fig1*_ncv1_overlay_all_selected.csv`
+  重绘，无需重跑仿真。
 
 ## 10. 扩展任务：NCV 分层嵌套选模（ncv0/ncv1/ncv2/ncv3）
 
